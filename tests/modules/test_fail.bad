@@ -1,0 +1,2 @@
+import tests.modules.module_fail;
+print(module_fail.add(5, 10));

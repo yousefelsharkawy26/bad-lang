@@ -1,0 +1,57 @@
+// test_gc.bad
+
+fn create_garbage() {
+    let i = 0;
+    while (i < 1000) {
+        let s = "garbage value " + str(i);
+        i = i + 1;
+    }
+}
+
+println("Testing GC...");
+
+// 1. Stress test allocations
+let j = 0;
+while (j < 20) {
+    create_garbage();
+    j = j + 1;
+}
+println("Stress test done.");
+
+// 2. Manual GC call
+let my_val = "I should survive GC";
+gc();
+println(my_val);
+
+// 3. Nested objects check
+class Node {
+    let value: string;
+    let next: Node;
+}
+
+let n1 = new Node();
+n1.value = "survivor 1";
+let n2 = new Node();
+n2.value = "survivor 2";
+n1.next = n2;
+
+gc();
+
+println("Value 1: " + n1.value);
+println("Value 2: " + n1.next.value);
+
+// 4. Closures check
+fn make_counter() {
+    let count = 0;
+    return fn() {
+        count = count + 1;
+        return count;
+    };
+}
+
+let counter = make_counter();
+println("Counter 1: " + str(counter()));
+gc();
+println("Counter 2: " + str(counter()));
+
+println("GC Test Completed Successfully.");

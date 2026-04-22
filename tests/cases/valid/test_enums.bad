@@ -1,0 +1,18 @@
+enum Color {
+    Red,
+    Green,
+    Blue
+}
+
+var c = Color.Green;
+if (c == Color.Red) {
+    print(111);
+}
+if (c == Color.Green) {
+    print(222);
+}
+if (c == Color.Blue) {
+    print(333);
+}
+
+print(c);

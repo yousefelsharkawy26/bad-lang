@@ -1,0 +1,13 @@
+class MathLib {
+    fn sin(x: number): number { return math_sin(x); }
+    fn cos(x: number): number { return math_cos(x); }
+    fn tan(x: number): number { return math_tan(x); }
+    fn sqrt(x: number): number { return math_sqrt(x); }
+    fn pow(b: number, e: number): number { return math_pow(b, e); }
+    fn floor(x: number): number { return math_floor(x); }
+    fn ceil(x: number): number { return math_ceil(x); }
+    fn round(x: number): number { return math_round(x); }
+    fn abs(x: number): number { return math_abs(x); }
+}
+
+var Math = new MathLib();

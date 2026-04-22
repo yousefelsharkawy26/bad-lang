@@ -1,0 +1,10 @@
+// Test 3: Method calls itself infinitely (via class)
+class Dog {
+    fun bark() {
+        this.bark();
+    }
+
+    fun init() {}
+}
+var d = new Dog();
+d.bark();

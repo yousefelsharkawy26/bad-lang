@@ -1,0 +1,14 @@
+class A {
+    func test() { print(1); }
+}
+class B : A {
+    func test() {
+        super.test();
+        print(2);
+    }
+}
+
+func main() {
+    var b = new B();
+    b.test(); // Should print 1 then 2
+}

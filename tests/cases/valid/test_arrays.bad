@@ -1,0 +1,15 @@
+var arr = [10, 20, 30, 40, 50];
+print(arr[0]);
+print(arr[2]);
+print(arr[4]);
+
+arr[2] = 100;
+print(arr[2]);
+
+var sum = 0;
+var i = 0;
+while (i < 5) {
+    sum = sum + arr[i];
+    i = i + 1;
+}
+print(sum);

@@ -1,0 +1,51 @@
+// Test Logical Short-circuiting
+var sideEffect = false;
+func setSideEffect() {
+    sideEffect = true;
+    return true;
+}
+
+print("Testing && short-circuiting...");
+var result1 = false && setSideEffect();
+assert(result1 == false, "&& result should be false");
+assert(sideEffect == false, "&& should have short-circuited");
+
+print("Testing || short-circuiting...");
+var result2 = true || setSideEffect();
+assert(result2 == true, "|| result should be true");
+assert(sideEffect == false, "|| should have short-circuited");
+
+// Test ToNumber
+print("Testing toNumber...");
+var numStr = "42.5";
+var n = toNumber(numStr);
+assert(n == 42.5, "toNumber failed");
+
+// Test Super
+print("Testing super...");
+class Base {
+    func init() {}
+    func greet() {
+        return "Hello from Base";
+    }
+}
+
+class Derived : Base {
+    func init() {}
+    func greet() {
+        return super.greet() + " and Derived";
+    }
+}
+
+var d = new Derived();
+var greeting = d.greet();
+print(greeting);
+assert(greeting == "Hello from Base and Derived", "super call failed");
+
+// Test TypeCast (mostly a no-op at runtime but should work)
+print("Testing type cast...");
+var x = "123" as number; // Fixed syntax: expr as type
+print("All advanced features tested successfully!");
+
+var x = "123" as number; // Fixed syntax: expr as type
+

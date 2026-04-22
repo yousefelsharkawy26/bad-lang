@@ -1,0 +1,19 @@
+class OSLib {
+    fn getEnv(name: string): string {
+        return os_getenv(name);
+    }
+
+    fn exit(code: number): void {
+        os_exit(code);
+    }
+
+    fn platform(): string {
+        return os_platform();
+    }
+
+    fn args(): any[] {
+        return os_args();
+    }
+}
+
+var OS = new OSLib();

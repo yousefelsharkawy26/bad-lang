@@ -1,0 +1,13 @@
+class Test {
+    var x;
+    init(val) {
+        this.x = val;
+    }
+    getX() {
+        return this.x;
+    }
+}
+
+var t = new Test(123);
+print(t.x);
+print(t.getX());

@@ -1,0 +1,36 @@
+class Animal {
+    var name;
+    init(n) {
+        this.name = n;
+    }
+    speak() {
+        print("Animal says something");
+    }
+}
+
+class Dog : Animal {
+    var breed;
+    init(n, b) {
+        // super.init(n); // Interpreter supports this? Let's check Parser.
+        this.name = n;
+        this.breed = b;
+    }
+    speak() {
+        print(this.name, "says Woof!");
+    }
+}
+
+var d = new Dog("Buddy", "Golden Retriever");
+print("Name:", d.name);
+print("Breed:", d.breed);
+d.speak();
+
+class Cat : Animal {
+    speak() {
+        print(this.name, "says Meow!");
+    }
+}
+
+var c = new Cat("Whiskers");
+print("Name:", c.name);
+c.speak();

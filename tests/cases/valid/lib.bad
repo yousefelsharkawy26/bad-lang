@@ -1,0 +1,9 @@
+export class Calculator {
+    fn add(a, b) {
+        return a + b;
+    }
+}
+
+export fn hello(name) {
+    print("Hello, " + name + "!");
+}

@@ -1,0 +1,3 @@
+var x = 10;
+var y = x - "hello"; // Arithmetic on string is an error
+print(z); // Undefined variable error

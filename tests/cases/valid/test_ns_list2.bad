@@ -1,0 +1,2 @@
+var myList = List.new();
+print("ok");

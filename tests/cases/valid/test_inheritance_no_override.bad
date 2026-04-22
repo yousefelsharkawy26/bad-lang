@@ -1,0 +1,13 @@
+class A {
+    func test() {
+        print(1);
+    }
+}
+
+class B : A {
+}
+
+func main() {
+    var b = new B();
+    b.test(); // Should print 1
+}

@@ -1,0 +1,22 @@
+class Animal {
+    var name : string;
+    func __init(name : string) {
+        this.name = name;
+    }
+    func speak() {
+        print("Generic sound");
+    }
+}
+
+class Dog : Animal {
+    func speak() {
+        print("Woof!");
+    }
+}
+
+func makeItSpeak(a : Animal) {
+    a.speak();
+}
+
+var d = new Dog("Buddy");
+makeItSpeak(d);

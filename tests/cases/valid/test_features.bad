@@ -1,0 +1,10 @@
+
+print("Hello from BadLang LLVM!");
+
+var name = "Developer";
+var version = 1.0;
+print("Interpolation Test:");
+"Name: {name}, Version: {version}";
+
+var arr = [1, 2, 3];
+"Array length is: {len(arr)}";

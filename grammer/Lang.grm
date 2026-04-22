@@ -1,0 +1,291 @@
+"start symbol" = <program>
+
+{String Char} = {Printable} - ["]
+
+!===========================================================
+!  TERMINALS
+!===========================================================
+
+Identifier          = {Letter}({Letter}|{Digit}|'_')*
+Integer             = {Digit}+
+Float               = ( {Digit}+ '.' {Digit}* | '.' {Digit}+ ) ( [eE] [+-]? {Digit}+ )?
+                    | {Digit}+ [eE] [+-]? {Digit}+
+String              = '"' {String Char}* '"'
+InterpolatedString  = '$' '"' {String Char}* '"'
+Boolean             = 'true' | 'false'
+
+MathOp_High         = '*' | '/' | '%' | '^'
+MathOp_Low          = '+' | '-'
+CompoundAssign      = '+=' | '-=' | '*=' | '/=' | '%='
+BooleanOp           = '==' | '!=' | '<' | '>' | '<=' | '>='
+
+!===========================================================
+!  PROGRAM STRUCTURE
+!===========================================================
+
+<program>   ::= <stmt_list>
+            |
+
+<stmt_list> ::= <stmt_list> <stmt>
+            | <stmt>
+
+<stmt> ::= <import_stmt>
+         | <class>
+         | <interface>
+         | <enum>
+         | <struct>
+         | <if_stmt>
+         | <switch_stmt>
+         | <loop>
+         | <jump_stmt>
+         | <try_catch>
+         | <fn_decl>
+         | <method_call_expr> ';'
+         | <declaration>  ';'
+         | <assignment>   ';'
+         | <compound_assign> ';'
+         | <inc_dec>      ';'
+
+<block> ::= '{' <stmt_list> '}'
+          | '{' '}'
+
+<simple_block> ::= <block>
+                 | <stmt>
+
+!===========================================================
+!  IMPORT  →  import Module;
+!===========================================================
+
+<import_stmt> ::= 'import' <dotted_id> ';'
+
+<dotted_id>  ::= <dotted_id> '.' Identifier
+             | Identifier
+
+!===========================================================
+!  DECLARATIONS & ASSIGNMENTS
+!===========================================================
+
+<declaration> ::= <type> Identifier
+                | <type> Identifier '=' <expr>
+                | 'var' Identifier '=' <expr>
+
+<assignment>  ::= <lvalue> '=' <expr>
+
+<compound_assign> ::= <lvalue> CompoundAssign <expr>
+
+<inc_dec> ::= <lvalue> '++'
+            | <lvalue> '--'
+            | '++' <lvalue>
+            | '--' <lvalue>
+
+<lvalue> ::= Identifier
+           | <member_access>
+
+<declaration_list> ::= <declaration_list> <declaration> ';'
+                     | <declaration> ';'
+
+!===========================================================
+!  CLASS  →  class Name<T> : Parent, IFace1 { }
+!===========================================================
+
+<generic>    ::= '<' <id_list> '>'
+             |
+
+<inheritance> ::= ':' <id_list>
+                |
+
+<id_list> ::= <id_list> ',' Identifier
+            | Identifier
+
+<class> ::= 'class' Identifier <generic> <inheritance> <block>
+
+!===========================================================
+!  INTERFACE
+!===========================================================
+
+<interface> ::= 'interface' Identifier <generic> '{' <fn_sig_list> '}'
+
+<fn_sig_list> ::= <fn_sig_list> <fn_sig>
+                | <fn_sig>
+                |
+
+<fn_sig> ::= 'fn' Identifier '(' <params> ')' ':' <type> ';'
+           | 'fn' Identifier '(' <params> ')' ';'
+
+!===========================================================
+!  ENUM
+!===========================================================
+
+<enum> ::= 'enum' Identifier '{' <enum_list> '}'
+
+<enum_list> ::= <enum_list> ',' Identifier
+              | Identifier
+
+!===========================================================
+!  STRUCT
+!===========================================================
+
+<struct> ::= 'struct' Identifier '{' <declaration_list> '}'
+           | 'struct' Identifier '{' '}'
+
+!===========================================================
+!  IF / ELSE
+!===========================================================
+
+<if_stmt> ::= 'if' <expr> <block> <else_clause>
+            | 'if' '(' <expr> ')' <block> <else_clause>
+
+<else_clause> ::= 'else' <block>
+                | 'else' <if_stmt>
+                |
+
+!===========================================================
+!  SWITCH / CASE
+!===========================================================
+
+<switch_stmt> ::= 'switch' <expr> '{' <case_list> <default_case> '}'
+                | 'switch' '(' <expr> ')' '{' <case_list> <default_case> '}'
+
+<case_list> ::= <case_list> <case_item>
+              | <case_item>
+
+<case_item> ::= 'case' <expr> ':' <stmt_list>
+              | 'case' <expr> ':' <block>
+
+<default_case> ::= 'default' ':' <stmt_list>
+                 | 'default' ':' <block>
+                 |
+
+!===========================================================
+!  LOOPS
+!===========================================================
+
+<loop> ::= 'do' <block> 'while' <expr> ';'
+         | 'while' <expr> <block>
+         | 'while' '(' <expr> ')' <block>
+         | 'for' Identifier 'in' <expr> <block>
+
+<jump_stmt> ::= 'break' ';'
+              | 'continue' ';'
+              | 'return' <expr> ';'
+              | 'return' ';'
+
+!===========================================================
+!  TRY / CATCH
+!===========================================================
+
+<try_catch> ::= 'try' <block> <catch_list> <finally_block>
+
+<catch_list> ::= <catch_list> <catch_clause>
+               | <catch_clause>
+
+<catch_clause> ::= 'catch' '(' <type> Identifier ')' <block>
+                 | 'catch' <block>
+
+<finally_block> ::= 'finally' <block>
+                  |
+
+!===========================================================
+!  FUNCTION DECLARATIONS
+!===========================================================
+
+<fn_decl> ::= 'fn' Identifier '(' <params> ')' ':' <type> <block>
+            | 'fn' Identifier '(' <params> ')' <block>
+
+<params> ::= <params_list>
+           |
+
+<params_list> ::= <params_list> ',' <param>
+                | <param>
+
+<param> ::= Identifier ':' <type>
+          | <type> Identifier
+
+!  Lambda
+<lambda> ::= '(' <params> ')' '=>' <expr>
+           | '(' <params> ')' '=>' <block>
+           | Identifier '=>' <expr>
+
+!===========================================================
+!  CALLS & MEMBER ACCESS
+!===========================================================
+
+<member_access> ::= <factor> '.' Identifier
+
+<method_call_expr> ::= <factor> '(' <args> ')'
+
+<args> ::= <args_list>
+         |
+
+<args_list> ::= <args_list> ',' <expr>
+              | <expr>
+
+!===========================================================
+!  EXPRESSION HIERARCHY
+!===========================================================
+
+<expr> ::= <ternary_expr>
+
+<ternary_expr> ::= <null_coalesce> '?' <expr> ':' <expr>
+                 | <null_coalesce>
+
+<null_coalesce> ::= <null_coalesce> '??' <logical_or>
+                  | <logical_or>
+
+<logical_or> ::= <logical_or> '||' <logical_and>
+               | <logical_and>
+
+<logical_and> ::= <logical_and> '&&' <comparison>
+                | <comparison>
+
+<comparison> ::= <add_expr> BooleanOp <add_expr>
+               | <add_expr>
+
+<add_expr> ::= <add_expr> MathOp_Low <mul_expr>
+             | <mul_expr>
+
+<mul_expr> ::= <mul_expr> MathOp_High <unary_expr>
+             | <unary_expr>
+
+<unary_expr> ::= '-' <unary_expr>
+               | '!' <unary_expr>
+               | <factor>
+
+<factor> ::= <method_call_expr>
+           | <member_access>
+           | <lambda>
+           | <array_literal>
+           | <type_cast>
+           | <primary>
+
+<primary> ::= Integer
+            | Float
+            | String
+            | InterpolatedString
+            | Boolean
+            | Identifier
+            | 'new' Identifier '(' <args> ')'
+            | '(' <expr> ')'
+
+<array_literal> ::= '[' <args> ']'
+
+<type_cast> ::= <factor> 'as' <type>
+
+!===========================================================
+!  TYPES
+!===========================================================
+
+<type> ::= <primitive_type>
+         | <array_type>
+         | <generic_type>
+         | Identifier
+
+<primitive_type> ::= 'bool' | 'string' | 'char' | 'num' | 'any' | 'void' | 'int' | 'float' | 'double'
+
+<array_type> ::= <type> '[' ']'
+
+<generic_type> ::= Identifier '<' <type_list> '>'
+
+<type_list> ::= <type_list> ',' <type>
+              | <type>
+=================

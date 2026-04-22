@@ -1,0 +1,2 @@
+print(Math.abs(-5));
+print("ok");

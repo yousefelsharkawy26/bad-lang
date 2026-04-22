@@ -1,0 +1,58 @@
+// Test Ternary
+var a = true ? "yes" : "no";
+println("Ternary true:", a);
+assert(a == "yes", "Ternary true failed");
+
+var b = false ? "yes" : "no";
+println("Ternary false:", b);
+assert(b == "no", "Ternary false failed");
+
+// Test Null-coalescing
+var c = null ?? "default";
+println("Null-coalescing null:", c);
+assert(c == "default", "Null-coalescing null failed");
+
+var d = "value" ?? "default";
+println("Null-coalescing value:", d);
+assert(d == "value", "Null-coalescing value failed");
+
+// Test Lambda
+var square = (x) => x * x;
+println("Lambda 5*5:", square(5));
+assert(square(5) == 25, "Lambda failed");
+
+var add = (x, y) => {
+    return x + y;
+};
+println("Lambda 10+20:", add(10, 20));
+assert(add(10, 20) == 30, "Lambda block failed");
+
+// Test Struct
+struct Point { x, y }
+var p = Point(10, 20);
+println("Struct Point:", p);
+assert(p.x == 10, "Struct x failed");
+assert(p.y == 20, "Struct y failed");
+
+// Test Enum
+enum Color { Red, Green, Blue }
+println("Enum Color.Red:", Color.Red);
+assert(Color.Red == 0, "Enum Red failed");
+assert(Color.Green == 1, "Enum Green failed");
+
+// Test For-in
+var list = [1, 2, 3];
+var sum = 0;
+for (item in list) {
+    sum = sum + item;
+}
+println("For-in sum:", sum);
+assert(sum == 6, "For-in failed");
+
+// Test TypeOf and IsNull
+assert(typeof(123) == "number", "typeof failed");
+assert(typeof("hi") == "string", "typeof failed");
+assert(isNull(null) == true, "isNull failed");
+assert(isNull(123) == false, "isNull failed");
+
+println("All IR features tested successfully!");

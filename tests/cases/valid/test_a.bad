@@ -1,0 +1,4 @@
+class A {}
+print(A);
+var a = new A();
+print(a);

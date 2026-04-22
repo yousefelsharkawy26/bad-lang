@@ -1,0 +1,6 @@
+class TimeLib {
+    fn now(): number { return time_now(); }
+    fn sleep(ms: number): void { time_sleep(ms); }
+}
+
+var Time = new TimeLib();

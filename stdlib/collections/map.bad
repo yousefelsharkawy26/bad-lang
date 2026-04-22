@@ -1,0 +1,12 @@
+class MapLib {
+    fn create(): any { return map_new(); }
+    fn set(m: any, key: any, value: any): void { map_set(m, key, value); }
+    fn get(m: any, key: any): any { return map_get(m, key); }
+    fn has(m: any, key: any): bool { return map_has(m, key); }
+    fn remove(m: any, key: any): void { map_remove(m, key); }
+    fn keys(m: any): any[] { return map_keys(m); }
+    fn values(m: any): any[] { return map_values(m); }
+    fn size(m: any): number { return map_size(m); }
+}
+
+var Maps = new MapLib();

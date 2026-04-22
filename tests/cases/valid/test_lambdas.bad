@@ -1,0 +1,41 @@
+fn create_adder(x) {
+    return fn(y) => x + y;
+}
+
+var add5 = create_adder(5);
+var add10 = create_adder(10);
+
+println(add5(2));
+println(add10(2));
+
+var counter = fn() {
+    var c = 0;
+    return fn() {
+        c = c + 1;
+        return c;
+    };
+};
+
+var count1 = counter();
+println(count1());
+println(count1());
+println(count1());
+
+var count2 = counter();
+println(count2());
+
+var list = [1, 2, 3];
+var map_fn = fn(l, f) {
+    var res = [0, 0, 0];
+    var i = 0;
+    while(i < len(l)) {
+        res[i] = f(l[i]);
+        i = i + 1;
+    }
+    return res;
+};
+
+var doubled = map_fn(list, fn(x) => x * 2);
+println(doubled[0]);
+println(doubled[1]);
+println(doubled[2]);

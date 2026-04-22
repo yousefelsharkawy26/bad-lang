@@ -1,0 +1,8 @@
+import module_a;
+
+print("Testing greet:");
+module_a.greet("World");
+
+print("Testing math object method calls:");
+let sum = module_a.add(10, 5);
+print("10 + 5 = " + str(sum));

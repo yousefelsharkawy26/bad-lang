@@ -1,0 +1,10 @@
+class StringLib {
+    fn length(s: string): number { return str_len(s); }
+    fn lower(s: string): string { return str_lower(s); }
+    fn upper(s: string): string { return str_upper(s); }
+    fn substring(s: string, start: number, len: number): string { return str_substring(s, start, len); }
+    fn replace(s: string, old: string, newStr: string): string { return str_replace(s, old, newStr); }
+    fn split(s: string, sep: string): any[] { return str_split(s, sep); }
+}
+
+var Strings = new StringLib();

@@ -1,0 +1,6 @@
+class A {
+    var x;
+}
+print(A);
+var a = new A();
+print(a);

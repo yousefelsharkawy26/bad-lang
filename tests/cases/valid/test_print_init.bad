@@ -1,0 +1,6 @@
+class A {
+    init() {}
+}
+print("Before");
+print(A);
+print("After");

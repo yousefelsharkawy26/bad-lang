@@ -1,0 +1,32 @@
+class A {
+    func test() { print(1); }
+}
+class B : A {
+    func test() { print(2); }
+}
+class C : B {
+}
+class D : C {
+    func test() { print(4); }
+}
+
+func main() {
+    var a = new A();
+    var b = new B();
+    var c = new C();
+    var d = new D();
+    
+    var obj = a;
+    obj.test(); // 1
+    
+    obj = b;
+    obj.test(); // 2
+    
+    obj = c;
+    obj.test(); // 2
+    
+    obj = d;
+    obj.test(); // 4
+}
+
+main();

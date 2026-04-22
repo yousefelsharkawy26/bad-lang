@@ -1,0 +1,33 @@
+fn main() {
+    print("Starting try block...");
+    try {
+        print("Inside try...");
+        throw "Error in try";
+        print("This should not print");
+    } catch (e) {
+        print("Caught exception: " + e);
+    } finally {
+        print("Finally block executed");
+    }
+    print("After try-catch-finally");
+
+    test_nested();
+}
+
+fn test_nested() {
+    print("\nTesting nested try-catch...");
+    try {
+        try {
+            print("Inner try...");
+            throw "Inner error";
+        } catch (e) {
+            print("Caught inner: " + e);
+            throw "Rethrown: " + e;
+        } finally {
+            print("Inner finally");
+        }
+    } catch (e) {
+        print("Caught outer: " + e);
+    }
+}
+main();

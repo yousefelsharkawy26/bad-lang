@@ -1,0 +1,27 @@
+
+print("--- BadLang LLVM Advanced Features ---");
+
+// Recursion & Math
+func factorial(n) {
+    if (n <= 1) return 1;
+    return n * factorial(n - 1);
+}
+
+var myN = 5;
+print($"Factorial of {myN} is {factorial(myN)}");
+
+// Math Library
+print($"sin(0) = {sin(0)}");
+print($"cos(0) = {cos(0)}");
+print($"sqrt(16) = {sqrt(16)}");
+print($"pow(2, 3) = {pow(2, 3)}");
+
+// Array & Interpolation
+var arr = [1.1, 2.2, 3.3];
+var i = 0;
+while (i < len(arr)) {
+    print($"arr[{i}] = {arr[i]}");
+    i = i + 1;
+}
+
+print("Done.");

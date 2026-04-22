@@ -1,0 +1,3 @@
+var myList = List.new();
+List.push(myList, 10);
+print("ok");

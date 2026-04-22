@@ -1,0 +1,9 @@
+class Test {
+    var x;
+    init(val) {
+        this.x = val;
+    }
+}
+
+var t = new Test(123);
+print(t.x);

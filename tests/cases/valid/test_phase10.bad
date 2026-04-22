@@ -1,0 +1,52 @@
+// Phase 10: Control Flow & Standard Patterns Test
+
+print("--- Testing Break/Continue ---");
+var i = 0;
+while (i < 10) {
+    i = i + 1;
+    if (i == 3) continue;
+    if (i == 7) break;
+    print("i =", i);
+}
+// Expected: 1, 2, 4, 5, 6
+
+print("--- Testing Do-While ---");
+var j = 0;
+do {
+    print("j =", j);
+    j = j + 1;
+} while (j < 3);
+// Expected: 0, 1, 2
+
+print("--- Testing Ternary ---");
+var x = 10;
+var res1 = x > 5 ? "Greater" : "Smaller";
+var res2 = x < 5 ? "Greater" : "Smaller";
+print("res1 (expect Greater):", res1);
+print("res2 (expect Smaller):", res2);
+
+print("--- Testing Null Coalesce ---");
+var n = 0; // null-ish in BadLang
+var def = "Default";
+var val = n ?? def;
+print("val (expect Default):", val);
+
+var m = "Hello";
+var val2 = m ?? def;
+print("val2 (expect Hello):", val2);
+
+print("--- Testing Switch ---");
+var k = 2;
+switch (k) {
+    case 1:
+        print("One");
+        break;
+    case 2:
+        print("Two");
+        break;
+    default:
+        print("Other");
+}
+// Expected: Two
+
+print("Phase 10 tests completed!");

@@ -1,0 +1,15 @@
+import stdlib.system.os;
+import stdlib.system.net;
+
+println("=== OS Tests ===");
+println("Platform: " + OS.platform());
+println("Env PATH: " + OS.getEnv("PATH"));
+// println("Args: " + toString(OS.args()));
+
+println("=== Net Tests ===");
+// Test a simple HTTP GET
+// var google = Net.httpGet("https://www.google.com");
+// println("Google length: " + toString(string_length(google)));
+println("Net module loaded successfully.");
+
+println("=== All Tests Passed ===");

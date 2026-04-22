@@ -1,0 +1,31 @@
+class Base {
+    var x;
+    func init(val) {
+        this.x = val;
+    }
+    func greet() {
+        print(100 + this.x);
+    }
+}
+
+class Derived : Base {
+    var y;
+    func init(val, val2) {
+        this.x = val;
+        this.y = val2;
+    }
+    func greet() {
+        print(200 + this.x + this.y);
+    }
+}
+
+func main() {
+    var b = new Base(10);
+    var d = new Derived(10, 5);
+    
+    var obj = b;
+    obj.greet(); // Should print 110
+    
+    obj = d;
+    obj.greet(); // Should print 215 (virtual call)
+}

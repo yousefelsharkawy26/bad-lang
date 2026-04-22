@@ -1,0 +1,24 @@
+class Animal {
+    var name;
+    fun init(n) {
+        this.name = n;
+    }
+    fun speak() {
+        print("Animal says something");
+    }
+}
+
+class Dog : Animal {
+    var breed;
+    fun init(n, b) {
+        this.name = n;
+        this.breed = b;
+    }
+    fun speak() {
+        super.speak();
+        print("Woof!");
+    }
+}
+
+var d = new Dog("Buddy", "Golden Retriever");
+d.speak();

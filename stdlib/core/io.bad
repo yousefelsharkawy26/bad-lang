@@ -1,0 +1,10 @@
+class IOLib {
+    fn readFile(path: string): string { return io_read_file(path); }
+    fn writeFile(path: string, content: string): void { io_write_file(path, content); }
+    fn appendFile(path: string, content: string): void { io_append_file(path, content); }
+    fn exists(path: string): bool { return io_file_exists(path); }
+    fn delete(path: string): void { io_delete_file(path); }
+    fn readLines(path: string): any[] { return io_read_lines(path); }
+}
+
+var IO = new IOLib();

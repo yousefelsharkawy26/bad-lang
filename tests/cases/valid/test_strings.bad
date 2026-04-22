@@ -1,0 +1,26 @@
+let s1 = "Hello";
+let s2 = "World";
+let s3 = s1 + " " + s2;
+print(s3);
+
+let n = 123;
+let s4 = "Count: " + n;
+print(s4);
+
+let s5 = n + " is my number";
+print(s5);
+
+if (s1 == "Hello") {
+    print("s1 is Hello");
+}
+
+if (s1 != s2) {
+    print("s1 is not s2");
+}
+
+let s6 = "Hello";
+if (s1 == s6) {
+    print("s1 is s6");
+}
+
+print($"Interpolation: s1={s1}, n={n}, calc={n + 7}");

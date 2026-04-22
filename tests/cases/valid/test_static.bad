@@ -1,0 +1,6 @@
+class Test {
+    static hello() {
+        print("Hello");
+    }
+}
+Test.hello();

@@ -1,0 +1,34 @@
+// Milestone 3: Interfaces
+interface Printable {
+    fn describe(): string;
+}
+
+class Dog : Printable {
+    var name: string;
+    fn init(n: string) {
+        this.name = n;
+    }
+    fn describe(): string {
+        return "Dog: " + this.name;
+    }
+}
+
+class Cat : Printable {
+    var name: string;
+    fn init(n: string) {
+        this.name = n;
+    }
+    fn describe(): string {
+        return "Cat: " + this.name;
+    }
+}
+
+fn printInfo(p: Printable) {
+    print(p.describe());
+}
+
+var d = new Dog("Rex");
+var c = new Cat("Whiskers");
+
+printInfo(d);
+printInfo(c);

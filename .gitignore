@@ -1,0 +1,28 @@
+# .NET Core
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.user
+*.lock.json
+*.nuget.props
+*.nuget.targets
+
+# BadLang Build Artifacts
+*.bc
+*.ll
+*.out
+*.exe
+*.o
+*.s
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# User-specific
+BadLang.sln.DotSettings.user

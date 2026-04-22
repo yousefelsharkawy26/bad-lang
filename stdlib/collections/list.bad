@@ -1,0 +1,12 @@
+class ListLib {
+    fn push(l: any[], item: any): void { list_push(l, item); }
+    fn pop(l: any[]): any { return list_pop(l); }
+    fn removeAt(l: any[], index: number): void { list_remove_at(l, index); }
+    fn clear(l: any[]): void { list_clear(l); }
+    fn length(l: any[]): number { return list_length(l); }
+    fn contains(l: any[], item: any): bool { return list_contains(l, item); }
+    fn indexOf(l: any[], item: any): number { return list_index_of(l, item); }
+    fn reverse(l: any[]): void { list_reverse(l); }
+}
+
+var Lists = new ListLib();

@@ -1,0 +1,15 @@
+var m = Map.create();
+m["key"] = "value";
+
+print("Retrieving by literal: ");
+println(m["key"]);
+
+var key2 = "key";
+print("Retrieving by variable: ");
+println(m[key2]);
+
+if (m["key"] == "value") {
+    println("Equality check passed");
+} else {
+    println("Equality check failed");
+}

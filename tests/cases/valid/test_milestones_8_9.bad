@@ -1,0 +1,108 @@
+
+// Test Array Literal and Indexing
+var arr = [10, 20, 30];
+print("Array Length: ");
+println(List.length(arr)); // Wait, ArrayLiteral returns native array, not List.
+// So List.length(arr) won't work if arr is double*.
+// Let's use Index instead.
+print("arr[0]: "); println(arr[0]);
+print("arr[1]: "); println(arr[1]);
+print("arr[2]: "); println(arr[2]);
+
+// Test List
+var l = List.create();
+List.push(l, 100);
+List.push(l, 200);
+print("l[0]: "); println(l[0]);
+print("l[1]: "); println(l[1]);
+
+// Test Map
+var m = Map.create();
+Map.set(m, "key1", 500);
+Map.set(m, "key2", 600);
+print("m['key1']: "); println(m["key1"]);
+print("m['key2']: "); println(m["key2"]);
+
+// Test String Indexing
+var s = "Hello";
+print("s[0]: "); println(s[0]);
+print("s[4]: "); println(s[4]);
+
+// Test Do-While
+var i = 0;
+print("Do-While: ");
+do {
+    print(i);
+    print(" ");
+    i = i + 1;
+} while (i < 5);
+println("");
+
+// Test Break/Continue in While
+i = 0;
+print("Break/Continue: ");
+while (i < 10) {
+    i = i + 1;
+    if (i == 3) continue;
+    if (i == 6) break;
+    print(i);
+    print(" ");
+}
+println("");
+
+// Test Switch
+var x = 2;
+print("Switch Number: ");
+switch (x) {
+    case 1: println("One");
+    case 2: println("Two");
+    case 3: println("Three");
+    default: println("Other");
+}
+
+var s2 = "B";
+print("Switch String: ");
+switch (s2) {
+    case "A": println("Apple");
+    case "B": println("Banana");
+    case "C": println("Cherry");
+    default: println("Other");
+}
+
+// Test For-In (Array)
+print("For-In Array: ");
+for x in [1, 2, 3] {
+    print(x);
+    print(" ");
+}
+println("");
+
+// Test For-In (List)
+print("For-In List: ");
+var l2 = List.create();
+List.push(l2, 10);
+List.push(l2, 20);
+for x in l2 {
+    print(x);
+    print(" ");
+}
+println("");
+
+// Test For-In (String)
+print("For-In String: ");
+for c in "ABC" {
+    print(c);
+    print(" ");
+}
+println("");
+
+// Test Ternary
+var a = 10;
+var b = 20;
+var max = a > b ? a : b;
+print("Max: "); println(max);
+
+// Test Null Coalesce
+var n = null;
+var res = n ?? "Default";
+print("Coalesce: "); println(res);

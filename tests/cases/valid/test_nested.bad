@@ -1,0 +1,17 @@
+struct Point {
+    x;
+    y;
+}
+
+struct Rect {
+    p1 : Point;
+    p2 : Point;
+}
+
+var r = new Rect();
+r.p1 = new Point();
+r.p1.x = 10;
+r.p1.y = 20;
+
+print(r.p1.x);
+print(r.p1.y);

@@ -1,0 +1,102 @@
+import stdlib.math;
+import stdlib.string;
+import stdlib.list;
+import stdlib.io;
+import stdlib.time;
+import stdlib.map;
+
+// ── Math Tests ──
+print("=== Math Tests ===");
+print($"  sqrt(16) = {Math.sqrt(16)}");
+print($"  pow(2, 10) = {Math.pow(2, 10)}");
+print($"  abs(-42) = {Math.abs(-42)}");
+print($"  floor(3.7) = {Math.floor(3.7)}");
+print($"  ceil(3.2) = {Math.ceil(3.2)}");
+print($"  round(3.5) = {Math.round(3.5)}");
+
+// ── String Tests ──
+print("\n=== String Tests ===");
+var s = "Hello World";
+print($"  Original: {s}");
+print($"  Lower: {Strings.lower(s)}");
+print($"  Upper: {Strings.upper(s)}");
+print($"  Length: {Strings.length(s)}");
+print($"  Substring(0, 5): {Strings.substring(s, 0, 5)}");
+var oldWord = "World";
+var newWord = "BadLang";
+var replaced = Strings.replace(s, oldWord, newWord);
+print($"  Replace: {replaced}");
+
+// ── List Tests ──
+print("\n=== List Tests ===");
+var l = [10, 20, 30];
+print($"  Original: {str(l)}");
+print($"  Length: {Lists.length(l)}");
+Lists.push(l, 40);
+print($"  After push(40): {str(l)}");
+print($"  Contains 20: {Lists.contains(l, 20)}");
+print($"  IndexOf 30: {Lists.indexOf(l, 30)}");
+Lists.reverse(l);
+print($"  Reversed: {str(l)}");
+var popped = Lists.pop(l);
+print($"  Popped: {popped}");
+print($"  After pop: {str(l)}");
+
+// ── Map Tests ──
+print("\n=== Map Tests ===");
+var m = Maps.create();
+var kName = "name";
+var kVersion = "version";
+var kType = "type";
+var kAuthor = "author";
+Maps.set(m, kName, "BadLang");
+Maps.set(m, kVersion, "1.0");
+Maps.set(m, kType, "compiled");
+var nameVal = Maps.get(m, kName);
+var verVal = Maps.get(m, kVersion);
+print($"  name: {nameVal}");
+print($"  version: {verVal}");
+print($"  has type: {Maps.has(m, kType)}");
+print($"  has author: {Maps.has(m, kAuthor)}");
+print($"  size: {Maps.size(m)}");
+var mapKeys = Maps.keys(m);
+print($"  keys: {str(mapKeys)}");
+Maps.remove(m, kType);
+print($"  After remove type, size: {Maps.size(m)}");
+
+// ── IO Tests ──
+print("\n=== IO Tests ===");
+var testFile = "/tmp/badlang_test.txt";
+IO.writeFile(testFile, "Hello from BadLang!\nLine 2\nLine 3");
+print($"  File exists: {IO.exists(testFile)}");
+var content = IO.readFile(testFile);
+print($"  Content: {content}");
+var lines = IO.readLines(testFile);
+print($"  Line count: {Lists.length(lines)}");
+IO.appendFile(testFile, "\nLine 4");
+var content2 = IO.readFile(testFile);
+print($"  After append: {content2}");
+IO.delete(testFile);
+print($"  After delete, exists: {IO.exists(testFile)}");
+
+// ── Time Tests ──
+print("\n=== Time Tests ===");
+var t1 = Time.now();
+print($"  Timestamp: {t1}");
+
+// ── Modulo Test ──
+print("\n=== Modulo Tests ===");
+print($"  10 % 3 = {10 % 3}");
+print($"  7 % 2 = {7 % 2}");
+print($"  100 % 10 = {100 % 10}");
+
+// ── Type Utility Tests ──
+print("\n=== Type Tests ===");
+print($"  typeof(42) = {typeof(42)}");
+var hi = "hi";
+print($"  typeof(hi) = {typeof(hi)}");
+print($"  typeof(true) = {typeof(true)}");
+print($"  typeof([1,2]) = {typeof([1,2])}");
+print($"  toInt(3.9) = {toInt(3.9)}");
+
+print("\n=== All Tests Passed ===");

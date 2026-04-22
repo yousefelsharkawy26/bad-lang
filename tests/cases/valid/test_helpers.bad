@@ -1,0 +1,7 @@
+// Bug 1 fix test: var with bad type should still define the variable
+var x: number;
+x = 1000;
+print(x);
+
+// Bug 2 fix test: interpolated string with undefined var should error
+print($"{undefinedVar}");

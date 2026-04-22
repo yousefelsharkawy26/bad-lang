@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BadLang.Cli/BadLang.Cli.csproj" />
+    <Project Path="src/BadLang.Core/BadLang.Core.csproj" />
+    <Project Path="src/BadLang.Lexer/BadLang.Lexer.csproj" />
+    <Project Path="src/BadLang.Parser/BadLang.Parser.csproj" />
+    <Project Path="src/BadLang.Semantic/BadLang.Semantic.csproj" />
+    <Project Path="src/BadLang.IR/BadLang.IR.csproj" />
+    <Project Path="src/BadLang.Backend/BadLang.Backend.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/unit/UnitTests.csproj" />
+  </Folder>
+</Solution>

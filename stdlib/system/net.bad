@@ -1,0 +1,7 @@
+class NetLib {
+    fn httpGet(url: string): string {
+        return net_http_get(url);
+    }
+}
+
+var Net = new NetLib();

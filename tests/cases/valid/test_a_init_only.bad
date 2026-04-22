@@ -1,0 +1,8 @@
+class A {
+    init(v) {
+        this.x = v;
+    }
+}
+print(A);
+var a = new A(123);
+print(a.x);

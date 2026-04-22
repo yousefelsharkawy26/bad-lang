@@ -1,0 +1,4 @@
+print(x);
+print(y);
+if (1) { } // Parse error: expect expression in parens, but wait, '1' is an expression.
+fn f(a) { return b; }

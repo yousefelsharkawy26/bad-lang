@@ -1,0 +1,11 @@
+export fn hello() {
+    print("hello from module");
+}
+
+export fn greet(name) {
+    print("Hello, " + name + "!");
+}
+
+export fn add(a, b) {
+    return a + b;
+}
