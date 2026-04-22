@@ -1,7 +1,7 @@
 # BadLang
 
 <p align="center">
-  <img src="editor/bad-lang-vscode/images/logo.jpg" alt="BadLang Logo" width="128">
+  <img src="images/logo.jpg" alt="BadLang Logo" width="128">
 </p>
 
 ```text
