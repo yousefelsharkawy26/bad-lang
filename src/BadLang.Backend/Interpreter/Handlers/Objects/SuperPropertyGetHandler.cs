@@ -1,18 +1,16 @@
-using System;
 using BadLang.IR;
-using BadLang.Core;
 using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Objects;
 
-public class SuperPropertyGetHandler : IIRNodeHandler
+public class SuperPropertyGetHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRSuperPropertyGet) };
-    public bool CanHandle(IRNode node) => node is IRSuperPropertyGet;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrSuperPropertyGet)];
+    public bool CanHandle(IrNode node) => node is IrSuperPropertyGet;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var spget = (IRSuperPropertyGet)node;
+        var spget = (IrSuperPropertyGet)node;
         var env = context.Environment;
         var superClass = env.Get("super") as BadLangClass;
         var instance = env.Get("this") as BadLangInstance;

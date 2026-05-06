@@ -19,7 +19,7 @@ public class IROptimizer
     /// Run all passes in order. Returns the final optimized IR.
     /// The original input list is never mutated.
     /// </summary>
-    public IReadOnlyList<IRNode> Optimize(IReadOnlyList<IRNode> nodes)
+    public IReadOnlyList<IrNode> Optimize(IReadOnlyList<IrNode> nodes)
     {
         var result = nodes;
         foreach (var pass in _passes)

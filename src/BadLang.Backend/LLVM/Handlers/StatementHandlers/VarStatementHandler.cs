@@ -1,16 +1,17 @@
 using BadLang.Backend.LLVM.Core;
-using BadLang.Backend.LLVM.Infrastructure;
 using BadLang.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.StatementHandlers;
 
-public class VarStatementHandler : StatementHandler
+public class VarStatementHandler(
+    CompilationSession session,
+    IStatementCompiler statementCompiler,
+    IExpressionCompiler expressionCompiler)
+    : StatementHandler(session, statementCompiler, expressionCompiler)
 {
-    public VarStatementHandler(CompilationSession session, IStatementCompiler statementCompiler, IExpressionCompiler expressionCompiler) 
-        : base(session, statementCompiler, expressionCompiler) { }
-
     public override bool CanHandle(Stmt stmt) => stmt is Stmt.Var;
 
     public override void Compile(Stmt stmt)
@@ -19,15 +20,9 @@ public class VarStatementHandler : StatementHandler
         var builder = Session.Infrastructure.Builder;
         var ctx = Session.Infrastructure.Context;
 
-        LLVMValueRef initialVal;
-        if (varStmt.Initializer != null)
-        {
-            initialVal = ExpressionCompiler.Compile(varStmt.Initializer);
-        }
-        else
-        {
-            initialVal = Session.ToI64(LLVMValueRef.CreateConstReal(ctx.DoubleType, 0.0));
-        }
+        var initialVal = varStmt.Initializer != null ? 
+            ExpressionCompiler.Compile(varStmt.Initializer) : 
+            Session.ToI64(LLVMValueRef.CreateConstReal(ctx.DoubleType, 0.0));
 
         var ptr = builder.BuildAlloca(ctx.Int64Type, varStmt.Name.Lexeme);
         builder.BuildStore(initialVal, ptr);

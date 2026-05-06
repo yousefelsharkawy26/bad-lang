@@ -1,19 +1,17 @@
-using System;
-using System.Collections.Generic;
 using BadLang.IR;
 using BadLang.Core;
 using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Objects;
 
-public class PropertyGetHandler : IIRNodeHandler
+public class PropertyGetHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRPropertyGet) };
-    public bool CanHandle(IRNode node) => node is IRPropertyGet;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrPropertyGet)];
+    public bool CanHandle(IrNode node) => node is IrPropertyGet;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var pget = (IRPropertyGet)node;
+        var pget = (IrPropertyGet)node;
         var obj = context.Eval(pget.Object);
         
         if (obj is BadLangInstance instance)
@@ -22,7 +20,7 @@ public class PropertyGetHandler : IIRNodeHandler
         }
         else if (obj is Dictionary<object, object?> dict)
         {
-            context.Environment.Define(pget.Target, dict.TryGetValue(pget.Property, out var v) ? v : null);
+            context.Environment.Define(pget.Target, dict.GetValueOrDefault(pget.Property));
         }
         else throw new Exception("Only instances and maps have properties.");
 

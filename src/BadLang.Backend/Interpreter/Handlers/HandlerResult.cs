@@ -1,12 +1,11 @@
-using BadLang.Backend.Interpreter.Runtime;
 namespace BadLang.Backend.Interpreter.Handlers;
 
 public class HandlerResult
 {
-    public bool AdvanceIP { get; set; } = true;
+    public bool AdvanceIp { get; private init; } = true;
     
-    public static readonly HandlerResult Continue = new() { AdvanceIP = true };
-    public static readonly HandlerResult Jump = new() { AdvanceIP = false };
+    public static readonly HandlerResult Continue = new() { AdvanceIp = true };
+    public static readonly HandlerResult Jump = new() { AdvanceIp = false };
     
     [System.Obsolete("Use Continue instead")]
     public static readonly HandlerResult Default = Continue;

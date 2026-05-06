@@ -1,7 +1,5 @@
 using BadLang.Core;
 using BadLang.Backend.Interpreter.Runtime;
-using BadLang.Parser;
-using System.Collections.Generic;
 
 namespace BadLang.Backend.Interpreter;
 
@@ -39,9 +37,9 @@ public class Environment
 
     public object? Get(string name)
     {
-        if (_values.ContainsKey(name))
+        if (_values.TryGetValue(name, out var value))
         {
-            return _values[name];
+            return value;
         }
 
         if (_enclosing != null) return _enclosing.Get(name);

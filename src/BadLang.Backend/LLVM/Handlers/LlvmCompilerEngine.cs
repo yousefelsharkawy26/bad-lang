@@ -1,58 +1,53 @@
 using BadLang.Backend.LLVM.Core;
 using BadLang.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 
 namespace BadLang.Backend.LLVM.Handlers;
 
-public class LlvmExpressionCompiler : IExpressionCompiler
+public class LlvmExpressionCompiler(CompilationSession session) : IExpressionCompiler
 {
     private readonly List<ExpressionHandler> _handlers = new();
-    private readonly CompilationSession _session;
 
-    public LlvmExpressionCompiler(CompilationSession session)
-    {
-        _session = session;
-    }
-
-    public void RegisterHandler(ExpressionHandler handler)
+    private void RegisterHandler(ExpressionHandler handler)
     {
         _handlers.Add(handler);
     }
 
     public void SetupDefaultHandlers(IStatementCompiler statementCompiler)
     {
-        RegisterHandler(new ExpressionHandlers.LiteralHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.UnaryHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.GroupingHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.BinaryHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.VariableHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.LogicalHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.AssignHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.TernaryHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.IndexHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.ThisHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.LambdaHandler(_session, this, statementCompiler));
-        RegisterHandler(new ExpressionHandlers.InterpolatedStringHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.TypeOfHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.NameOfHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.ToStringHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.ToNumberHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.IsNullHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.AssertHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.PanicHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.ArrayLiteralHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.MapLiteralHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.GetHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.SetHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.MethodCallHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.SuperCallHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.PrintCallHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.CallHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.TypeCastHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.NewHandler(_session, this));
-        RegisterHandler(new ExpressionHandlers.NullCoalesceHandler(_session, this));
+        RegisterHandler(new ExpressionHandlers.LiteralHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.UnaryHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.GroupingHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.BinaryHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.VariableHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.LogicalHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.AssignHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.TernaryHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.IndexHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.ThisHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.LambdaHandler(session, this, statementCompiler));
+        RegisterHandler(new ExpressionHandlers.InterpolatedStringHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.TypeOfHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.NameOfHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.ToStringHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.ToNumberHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.IsNullHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.AssertHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.PanicHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.ArrayLiteralHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.MapLiteralHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.GetHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.SetHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.MethodCallHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.SuperCallHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.PrintCallHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.CallHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.TypeCastHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.NewHandler(session, this));
+        RegisterHandler(new ExpressionHandlers.NullCoalesceHandler(session, this));
     }
 
     public LLVMValueRef Compile(Expr expr)
@@ -67,41 +62,35 @@ public class LlvmExpressionCompiler : IExpressionCompiler
     }
 }
 
-public class LlvmStatementCompiler : IStatementCompiler
+public class LlvmStatementCompiler(CompilationSession session) : IStatementCompiler
 {
     private readonly List<StatementHandler> _handlers = new();
-    private readonly CompilationSession _session;
 
-    public LlvmStatementCompiler(CompilationSession session)
-    {
-        _session = session;
-    }
-
-    public void RegisterHandler(StatementHandler handler)
+    private void RegisterHandler(StatementHandler handler)
     {
         _handlers.Add(handler);
     }
 
     public void SetupDefaultHandlers(IExpressionCompiler expressionCompiler)
     {
-        RegisterHandler(new StatementHandlers.ExpressionStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.BlockStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ReturnStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.VarStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.IfStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.WhileStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.DoWhileStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.BreakStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ContinueStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ForInStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.SwitchStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ThrowStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ConstStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.FunctionStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ClassStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.TryStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ExportStatementHandler(_session, this, expressionCompiler));
-        RegisterHandler(new StatementHandlers.ImportStatementHandler(_session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ExpressionStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.BlockStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ReturnStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.VarStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.IfStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.WhileStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.DoWhileStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.BreakStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ContinueStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ForInStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.SwitchStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ThrowStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ConstStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.FunctionStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ClassStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.TryStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ExportStatementHandler(session, this, expressionCompiler));
+        RegisterHandler(new StatementHandlers.ImportStatementHandler(session, this, expressionCompiler));
     }
 
     public void Compile(Stmt stmt)

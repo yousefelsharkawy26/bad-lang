@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using BadLang.Core;
-using BadLang.Lexer;
 
 using Spectre.Console;
 
@@ -31,15 +27,8 @@ public static class Highlighter
                 }
 
                 string color = GetTokenColor(token.Type);
-                if (color != null)
-                {
-                    sb.Append($"[{color}]{Markup.Escape(token.Lexeme)}[/]");
-                }
-                else
-                {
-                    sb.Append(Markup.Escape(token.Lexeme));
-                }
-                
+                sb.Append($"[{color}]{Markup.Escape(token.Lexeme)}[/]");
+
                 lastPos = token.Offset + token.Lexeme.Length;
             }
 
@@ -68,7 +57,9 @@ public static class Highlighter
             TokenType.This or TokenType.New or TokenType.Break or
             TokenType.Continue or TokenType.In or TokenType.As or
             TokenType.Switch or TokenType.Case or TokenType.Default or
-            TokenType.Interface or TokenType.Struct or TokenType.Enum => "blue",
+            TokenType.Interface or TokenType.Struct or TokenType.Enum or
+            TokenType.StringType or TokenType.NumType or TokenType.BoolType or 
+            TokenType.CharType or TokenType.VoidType or TokenType.AnyType=> "blue",
 
             TokenType.String or TokenType.InterpolatedString => "orange1",
             TokenType.Number => "green",
@@ -80,9 +71,9 @@ public static class Highlighter
             
             TokenType.OpenParen or TokenType.CloseParen or 
             TokenType.OpenBrace or TokenType.CloseBrace or 
-            TokenType.OpenBracket or TokenType.CloseBracket => "white",
+            TokenType.OpenBracket or TokenType.CloseBracket => "darkmagenta",
             
-            _ => null!
+            _ => "white"
         };
     }
 }

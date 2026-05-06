@@ -1,16 +1,15 @@
 using BadLang.IR;
-using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Advanced;
 
-public class ExportHandler : IIRNodeHandler
+public class ExportHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRExport) };
-    public bool CanHandle(IRNode node) => node is IRExport;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrExport)];
+    public bool CanHandle(IrNode node) => node is IrExport;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var exportNode = (IRExport)node;
+        var exportNode = (IrExport)node;
         context.Interpreter.HandleExport(exportNode);
         return HandlerResult.Continue;
     }

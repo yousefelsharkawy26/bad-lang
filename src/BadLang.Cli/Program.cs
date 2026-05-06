@@ -3,28 +3,28 @@ using BadLang.Cli.Commands;
 using BadLang.Backend.Interpreter;
 using Spectre.Console;
 
-var args_parsed = CliArgs.Parse(args);
+var argsParsed = CliArgs.Parse(args);
 var interpreter = new Interpreter();
 
-if (!args_parsed.LspMode)
+if (!argsParsed.LspMode)
     CliOutput.ShowBanner();
 
-if (args_parsed.LspMode)
+if (argsParsed.LspMode)
 {
     await BadLang.Cli.Lsp.BadLangLanguageServer.StartAsync();
     return;
 }
 
-if (args_parsed.ShowHelp)
+if (argsParsed.ShowHelp)
 {
     CliOutput.ShowHelp();
     return;
 }
 
-switch (args_parsed)
+switch (argsParsed)
 {
     case { Command: "build" or "llvm", InputPath: { } path }:
-        new BuildCommand().Execute(path, args_parsed.OutputPath, args_parsed.OptLevel, args_parsed.Verbose, args_parsed.LspMode);
+        new BuildCommand().Execute(path, argsParsed.OutputPath, argsParsed.OptLevel, argsParsed.Verbose, argsParsed.LspMode);
         break;
 
     case { Command: "check", InputPath: { } path }:

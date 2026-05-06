@@ -1,16 +1,15 @@
 using BadLang.IR;
-using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Variables;
 
-public class LoadHandler : IIRNodeHandler
+public class LoadHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRLoad) };
-    public bool CanHandle(IRNode node) => node is IRLoad;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrLoad)];
+    public bool CanHandle(IrNode node) => node is IrLoad;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var load = (IRLoad)node;
+        var load = (IrLoad)node;
         context.Environment.Define(load.Target, context.Environment.Get(load.VariableName));
         return HandlerResult.Continue;
     }

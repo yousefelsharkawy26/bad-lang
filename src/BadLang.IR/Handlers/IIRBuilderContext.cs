@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 
 namespace BadLang.IR.Handlers
 {
@@ -12,8 +13,8 @@ namespace BadLang.IR.Handlers
         (string StartLabel, string EndLabel) PeekLoop();
         bool HasLoop { get; }
 
-        void BuildStmt(Stmt stmt, List<IRNode> ir);
-        IRValue BuildExpr(Expr expr, List<IRNode> ir);
+        void BuildStmt(Stmt stmt, List<IrNode> ir);
+        IrValue BuildExpr(Expr expr, List<IrNode> ir);
         
         string? GetExportName(Stmt stmt);
     }

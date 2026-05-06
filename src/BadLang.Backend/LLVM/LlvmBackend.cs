@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
 using BadLang.Backend.LLVM.Abstractions;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Backend.LLVM.Handlers;
 using BadLang.Backend.LLVM.Infrastructure;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM;
@@ -12,7 +11,6 @@ namespace BadLang.Backend.LLVM;
 public class LlvmBackend : IDisposable
 {
     private readonly CompilationSession _session;
-    private readonly LlvmExpressionCompiler _expressionCompiler;
     private readonly LlvmStatementCompiler _statementCompiler;
     private readonly ICompilerInfrastructure _infrastructure;
     private string? _basePath;
@@ -32,11 +30,11 @@ public class LlvmBackend : IDisposable
         var runtime = new LlvmRuntimeProvider();
 
         _session = new CompilationSession(_infrastructure, symbols, runtime);
-        _expressionCompiler = new LlvmExpressionCompiler(_session);
+        var expressionCompiler = new LlvmExpressionCompiler(_session);
         _statementCompiler = new LlvmStatementCompiler(_session);
 
-        _expressionCompiler.SetupDefaultHandlers(_statementCompiler);
-        _statementCompiler.SetupDefaultHandlers(_expressionCompiler);
+        expressionCompiler.SetupDefaultHandlers(_statementCompiler);
+        _statementCompiler.SetupDefaultHandlers(expressionCompiler);
 
         runtime.DeclareRuntime(module, context);
     }
@@ -83,7 +81,7 @@ public class LlvmBackend : IDisposable
         // GC Init
         var gcInitFn = _infrastructure.Module.GetNamedFunction("badlang_gc_init");
         var dummyStack = _infrastructure.Builder.BuildAlloca(_infrastructure.Context.Int8Type, "gc_root");
-        _infrastructure.Builder.BuildCall2(_session.Runtime.GetRuntimeType("badlang_gc_init"), gcInitFn, new[] { dummyStack }, "");
+        _infrastructure.Builder.BuildCall2(_session.Runtime.GetRuntimeType("badlang_gc_init"), gcInitFn, [dummyStack]);
 
         foreach (var stmt in statements)
         {
@@ -91,8 +89,8 @@ public class LlvmBackend : IDisposable
             if (s is Stmt.Export e) s = e.Declaration;
 
             if (s is not Stmt.Function && s is not Stmt.Struct
-                && s is not Stmt.Enum && s is not Stmt.Class && s is not Stmt.Import
-                && s is not Stmt.Interface)
+                                       && s is not Stmt.Enum && s is not Stmt.Class && s is not Stmt.Import
+                                       && s is not Stmt.Interface)
             {
                 _statementCompiler.Compile(stmt);
             }

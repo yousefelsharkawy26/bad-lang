@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BadLang.Parser;
 using BadLang.IR.Handlers;
+using BadLang.Parser.Ast;
 
 namespace BadLang.IR
 {
@@ -29,9 +30,9 @@ namespace BadLang.IR
         public (string StartLabel, string EndLabel) PeekLoop() => _loops.Peek();
         public bool HasLoop => _loops.Count > 0;
 
-        public List<IRNode> Build(IReadOnlyList<Stmt> statements)
+        public List<IrNode> Build(IReadOnlyList<Stmt> statements)
         {
-            var ir = new List<IRNode>();
+            var ir = new List<IrNode>();
             foreach (var stmt in statements)
             {
                 BuildStmt(stmt, ir);
@@ -39,7 +40,7 @@ namespace BadLang.IR
             return ir;
         }
 
-        public void BuildStmt(Stmt stmt, List<IRNode> ir)
+        public void BuildStmt(Stmt stmt, List<IrNode> ir)
         {
             if (_registry.StmtHandlers.TryGetValue(stmt.GetType(), out var handler))
             {
@@ -51,7 +52,7 @@ namespace BadLang.IR
             }
         }
 
-        public IRValue BuildExpr(Expr expr, List<IRNode> ir)
+        public IrValue BuildExpr(Expr expr, List<IrNode> ir)
         {
             if (_registry.ExprHandlers.TryGetValue(expr.GetType(), out var handler))
             {
@@ -60,7 +61,7 @@ namespace BadLang.IR
             else
             {
                 Console.WriteLine($"[IRBuilder] Warning: expression type {expr.GetType().Name} is not fully supported yet. Returning null.");
-                return new IRConst(null);
+                return new IrConst(null);
             }
         }
 

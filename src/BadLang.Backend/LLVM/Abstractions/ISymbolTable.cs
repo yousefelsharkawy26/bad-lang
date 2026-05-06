@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Abstractions;

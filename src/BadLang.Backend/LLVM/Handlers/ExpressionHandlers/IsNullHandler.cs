@@ -1,14 +1,13 @@
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class IsNullHandler : ExpressionHandler
+public class IsNullHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public IsNullHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.IsNullExpr;
 
     public override LLVMValueRef Compile(Expr expr)
@@ -24,12 +23,12 @@ public class IsNullHandler : ExpressionHandler
         if (valType == "null")
         {
             // Statically known to be null
-            boolResult = LLVMValueRef.CreateConstInt(ctx.Int1Type, 1, false);
+            boolResult = LLVMValueRef.CreateConstInt(ctx.Int1Type, 1);
         }
-        else if (valType == "number" || valType == "bool")
+        else if (valType is "number" or "bool")
         {
             // Primitives are never null
-            boolResult = LLVMValueRef.CreateConstInt(ctx.Int1Type, 0, false);
+            boolResult = LLVMValueRef.CreateConstInt(ctx.Int1Type, 0);
         }
         else
         {

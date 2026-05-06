@@ -1,3 +1,4 @@
+import "math.bad";
 
 print("--- BadLang LLVM Advanced Features ---");
 

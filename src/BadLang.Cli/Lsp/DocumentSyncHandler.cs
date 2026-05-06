@@ -6,22 +6,13 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace BadLang.Cli.Lsp;
 
-public class DocumentSyncHandler : TextDocumentSyncHandlerBase
+public class DocumentSyncHandler(ILanguageServerFacade router) : TextDocumentSyncHandlerBase
 {
-    private readonly ILanguageServerFacade _router;
+    private readonly ILanguageServerFacade _router = router;
     private readonly ConcurrentDictionary<string, string> _documents = new();
-
-    public DocumentSyncHandler(ILanguageServerFacade router)
-    {
-        _router = router;
-    }
 
     public override TextDocumentAttributes GetTextDocumentAttributes(DocumentUri uri)
     {
@@ -85,13 +76,12 @@ public class DocumentSyncHandler : TextDocumentSyncHandlerBase
             {
                 foreach (var err in parser.Errors)
                 {
-                    if (err.Token == null) continue;
                     diagnostics.Add(new Diagnostic
                     {
                         Severity = DiagnosticSeverity.Error,
                         Range = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range(
                             new Position(err.Token.Line - 1, err.Token.Column),
-                            new Position(err.Token.Line - 1, err.Token.Column + (err.Token.Lexeme?.Length ?? 1))
+                            new Position(err.Token.Line - 1, err.Token.Column + (err.Token.Lexeme.Length))
                         ),
                         Message = err.Message,
                         Source = "badlang"
@@ -100,7 +90,7 @@ public class DocumentSyncHandler : TextDocumentSyncHandlerBase
             }
             else
             {
-                var typeChecker = new BadLang.Semantic.TypeChecker();
+                var typeChecker = new Semantic.TypeChecker();
                 // We'll use a relative path logic or default
                 typeChecker.SetBasePath(".");
                 typeChecker.Check(statements);
@@ -113,7 +103,7 @@ public class DocumentSyncHandler : TextDocumentSyncHandlerBase
                         Severity = DiagnosticSeverity.Error,
                         Range = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range(
                             new Position(err.Token.Line - 1, err.Token.Column),
-                            new Position(err.Token.Line - 1, err.Token.Column + (err.Token.Lexeme?.Length ?? 1))
+                            new Position(err.Token.Line - 1, err.Token.Column + (err.Token.Lexeme.Length))
                         ),
                         Message = err.Message,
                         Source = "badlang"
@@ -121,7 +111,7 @@ public class DocumentSyncHandler : TextDocumentSyncHandlerBase
                 }
             }
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             diagnostics.Add(new Diagnostic
             {

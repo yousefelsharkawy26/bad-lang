@@ -4,15 +4,15 @@ using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers;
 
-public class ExceptionHandlers : IIRNodeHandler
+public class ExceptionHandlers : IIrNodeHandler
 {
-    public IEnumerable<Type> GetHandledTypes() => new[] { typeof(IRTry), typeof(IRPopTry), typeof(IRThrow) };
-    public bool CanHandle(IRNode node) => 
-        node is IRTry || 
-        node is IRPopTry || 
-        node is IRThrow;
+    public IEnumerable<Type> GetHandledTypes() => new[] { typeof(IrTry), typeof(IrPopTry), typeof(IrThrow) };
+    public bool CanHandle(IrNode node) => 
+        node is IrTry || 
+        node is IrPopTry || 
+        node is IrThrow;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
         var env = context.Environment;
         var tryStack = context.TryStack;
@@ -20,7 +20,7 @@ public class ExceptionHandlers : IIRNodeHandler
 
         switch (node)
         {
-            case IRTry tryNode:
+            case IrTry tryNode:
                 tryStack.Push(new TryContext
                 {
                     CatchLabel = tryNode.CatchLabel,
@@ -28,10 +28,10 @@ public class ExceptionHandlers : IIRNodeHandler
                     SavedEnv = env
                 });
                 break;
-            case IRPopTry _:
+            case IrPopTry _:
                 tryStack.Pop();
                 break;
-            case IRThrow thrw:
+            case IrThrow thrw:
                 throw new BadLangException(interpreter.GetValueInternal(thrw.Exception, env));
         }
         

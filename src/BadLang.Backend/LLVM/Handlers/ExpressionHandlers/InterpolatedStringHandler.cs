@@ -1,16 +1,13 @@
-using System;
-using System.Collections.Generic;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class InterpolatedStringHandler : ExpressionHandler
+public class InterpolatedStringHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public InterpolatedStringHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.InterpolatedString;
 
     public override LLVMValueRef Compile(Expr expr)
@@ -25,7 +22,7 @@ public class InterpolatedStringHandler : ExpressionHandler
 
         foreach (var part in interpolated.Parts)
         {
-            if (part is Expr.Literal partLiteral && partLiteral.Value is string s)
+            if (part is Expr.Literal { Value: string s })
             {
                 var cstr = builder.BuildGlobalStringPtr(s, "str");
                 var strNew = module.GetNamedFunction("badlang_str_new");

@@ -2,16 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 
 namespace BadLang.IR.Handlers.Expressions
 {
     public class CallExprHandler : IExprBuildHandler
     {
         public Type TargetType => typeof(Expr.Call);
-        public IRValue Build(Expr expr, List<IRNode> ir, IIRBuilderContext context)
+        public IrValue Build(Expr expr, List<IrNode> ir, IIRBuilderContext context)
         {
             var callExpr = (Expr.Call)expr;
-            var args = new List<IRValue>();
+            var args = new List<IrValue>();
             foreach (var arg in callExpr.Arguments)
                 args.Add(context.BuildExpr(arg, ir));
             
@@ -20,62 +21,62 @@ namespace BadLang.IR.Handlers.Expressions
             if (callExpr.Callee is Expr.Get methodGet)
             {
                 var obj = context.BuildExpr(methodGet.Object, ir);
-                ir.Add(new IRMethodCall { Target = target, Object = obj, MethodName = methodGet.Name.Lexeme, Arguments = args });
+                ir.Add(new IrMethodCall { Target = target, Object = obj, MethodName = methodGet.Name.Lexeme, Arguments = args });
             }
             else if (callExpr.Callee is Expr.Super superGet)
             {
-                ir.Add(new IRSuperMethodCall { Target = target, MethodName = superGet.Method.Lexeme, Arguments = args });
+                ir.Add(new IrSuperMethodCall { Target = target, MethodName = superGet.Method.Lexeme, Arguments = args });
             }
             else if (callExpr.Callee is Expr.Variable funcVar)
             {
-                ir.Add(new IRCall { Target = target, FunctionName = funcVar.Name.Lexeme, Arguments = args });
+                ir.Add(new IrCall { Target = target, FunctionName = funcVar.Name.Lexeme, Arguments = args });
             }
             else
             {
                 var callee = context.BuildExpr(callExpr.Callee, ir);
-                ir.Add(new IRCall { Target = target, FunctionName = callee.ToString() ?? "unknown", Arguments = args });
+                ir.Add(new IrCall { Target = target, FunctionName = callee.ToString() ?? "unknown", Arguments = args });
             }
 
-            return new IRVar(target);
+            return new IrVar(target);
         }
     }
 
     public class NewExprHandler : IExprBuildHandler
     {
         public Type TargetType => typeof(Expr.New);
-        public IRValue Build(Expr expr, List<IRNode> ir, IIRBuilderContext context)
+        public IrValue Build(Expr expr, List<IrNode> ir, IIRBuilderContext context)
         {
             var newExpr = (Expr.New)expr;
-            var args = new List<IRValue>();
+            var args = new List<IrValue>();
             foreach (var arg in newExpr.Arguments)
                 args.Add(context.BuildExpr(arg, ir));
             var target = context.NextTemp();
             var klass = context.BuildExpr(newExpr.Callee, ir);
-            ir.Add(new IRNew { Target = target, Class = klass, Arguments = args });
-            return new IRVar(target);
+            ir.Add(new IrNew { Target = target, Class = klass, Arguments = args });
+            return new IrVar(target);
         }
     }
 
     public class LambdaExprHandler : IExprBuildHandler
     {
         public Type TargetType => typeof(Expr.Lambda);
-        public IRValue Build(Expr expr, List<IRNode> ir, IIRBuilderContext context)
+        public IrValue Build(Expr expr, List<IrNode> ir, IIRBuilderContext context)
         {
             var lambdaExpr = (Expr.Lambda)expr;
             var lambdaTarget = context.NextTemp();
-            var body = new List<IRNode>();
+            var body = new List<IrNode>();
             
             if (lambdaExpr.ExpressionBody != null)
             {
                 var retVal = context.BuildExpr(lambdaExpr.ExpressionBody, body);
-                body.Add(new IRReturn { Value = retVal });
+                body.Add(new IrReturn { Value = retVal });
             }
             else
             {
                 context.BuildStmt(new Stmt.Block(lambdaExpr.Body), body);
             }
             
-            var lambdaDef = new IRLambda
+            var lambdaDef = new IrLambda
             {
                 Target = lambdaTarget,
                 Parameters = lambdaExpr.Parameters.Select(p => p.Name.Lexeme).ToList(),
@@ -83,7 +84,7 @@ namespace BadLang.IR.Handlers.Expressions
             };
             
             ir.Add(lambdaDef);
-            return new IRVar(lambdaTarget);
+            return new IrVar(lambdaTarget);
         }
     }
 }

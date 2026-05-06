@@ -1,11 +1,6 @@
 namespace BadLang.Core;
 
-public class CompileError : Exception
+public class CompileError(string message, Token? token = null) : Exception(message)
 {
-    public Token? Token { get; }
-
-    public CompileError(string message, Token? token = null) : base(message)
-    {
-        Token = token;
-    }
+    public Token? Token { get; } = token;
 }

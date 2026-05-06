@@ -5,35 +5,35 @@ using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers;
 
-public class ValueHandlers : IIRNodeHandler
+public class ValueHandlers : IIrNodeHandler
 {
     public IEnumerable<Type> GetHandledTypes() => new[] { 
-        typeof(IRUnary), typeof(IRNewArray), typeof(IRNewMap), typeof(IRIndexGet), typeof(IRIndexSet) 
+        typeof(IrUnary), typeof(IrNewArray), typeof(IrNewMap), typeof(IrIndexGet), typeof(IrIndexSet) 
     };
-    public bool CanHandle(IRNode node) => 
-        node is IRUnary || 
-        node is IRNewArray || 
-        node is IRNewMap ||
-        node is IRIndexGet || 
-        node is IRIndexSet;
+    public bool CanHandle(IrNode node) => 
+        node is IrUnary || 
+        node is IrNewArray || 
+        node is IrNewMap ||
+        node is IrIndexGet || 
+        node is IrIndexSet;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
         var env = context.Environment;
         var interpreter = context.Interpreter;
 
         switch (node)
         {
-            case IRUnary un:
+            case IrUnary un:
                 env.Define(un.Target, Evaluator.EvaluateUnary(un.Op, context.Eval(un.Operand)));
                 break;
-            case IRNewArray narr:
+            case IrNewArray narr:
                 env.Define(narr.Target, narr.Elements.Select(e => context.Eval(e)).ToList());
                 break;
-            case IRNewMap nmap:
+            case IrNewMap nmap:
                 env.Define(nmap.Target, new Dictionary<object, object?>());
                 break;
-            case IRIndexGet iget:
+            case IrIndexGet iget:
                 {
                     var arr = context.Eval(iget.ArrayOrMap);
                     var idx = context.Eval(iget.Index);
@@ -48,7 +48,7 @@ public class ValueHandlers : IIRNodeHandler
                     }
                 }
                 break;
-            case IRIndexSet iset:
+            case IrIndexSet iset:
                 {
                     var arr = context.Eval(iset.ArrayOrMap);
                     var idx = context.Eval(iset.Index);

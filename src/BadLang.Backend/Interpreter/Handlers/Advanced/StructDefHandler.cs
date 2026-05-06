@@ -1,17 +1,16 @@
 using BadLang.IR;
-using BadLang.Core;
 using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Advanced;
 
-public class StructDefHandler : IIRNodeHandler
+public class StructDefHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRStructDef) };
-    public bool CanHandle(IRNode node) => node is IRStructDef;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrStructDef)];
+    public bool CanHandle(IrNode node) => node is IrStructDef;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var sdef = (IRStructDef)node;
+        var sdef = (IrStructDef)node;
         context.Environment.Define(sdef.Name, new BadLangStruct(sdef.Name, sdef.Fields));
         return HandlerResult.Continue;
     }

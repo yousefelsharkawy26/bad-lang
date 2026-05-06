@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using LLVMSharp.Interop;
 using BadLang.Backend.LLVM.Abstractions;
 
@@ -7,11 +6,14 @@ namespace BadLang.Backend.LLVM.Core;
 /// <summary>
 /// Orchestrates the compilation session by coordinating infrastructure, symbols, and runtime providers.
 /// </summary>
-public class CompilationSession
+public class CompilationSession(
+    ICompilerInfrastructure infrastructure,
+    ISymbolTable symbols,
+    IRuntimeProvider runtime)
 {
-    public ICompilerInfrastructure Infrastructure { get; }
-    public ISymbolTable Symbols { get; }
-    public IRuntimeProvider Runtime { get; }
+    public ICompilerInfrastructure Infrastructure { get; } = infrastructure;
+    public ISymbolTable Symbols { get; } = symbols;
+    public IRuntimeProvider Runtime { get; } = runtime;
 
     // Session-specific state
     public string CurrentNamespace { get; set; } = "";
@@ -31,17 +33,7 @@ public class CompilationSession
 
     // Method indexing for virtual dispatch
     private readonly Dictionary<string, int> _globalMethodIndices = new();
-    private int _nextMethodIndex = 0;
-
-    public CompilationSession(
-        ICompilerInfrastructure infrastructure, 
-        ISymbolTable symbols, 
-        IRuntimeProvider runtime)
-    {
-        Infrastructure = infrastructure;
-        Symbols = symbols;
-        Runtime = runtime;
-    }
+    private int _nextMethodIndex;
 
     public int GetGlobalMethodIndex(string name)
     {
@@ -88,7 +80,7 @@ public class CompilationSession
         if (value.TypeOf == Infrastructure.Context.DoubleType) return FromDouble(value);
         if (value.TypeOf.Kind == LLVMTypeKind.LLVMPointerTypeKind) return FromPtr(value);
         if (value.TypeOf == Infrastructure.Context.Int1Type) return Infrastructure.Builder.BuildZExt(value, Infrastructure.Context.Int64Type, "i1toi64");
-        throw new System.Exception($"Cannot convert {value.TypeOf} to i64");
+        throw new Exception($"Cannot convert {value.TypeOf} to i64");
     }
 
     public LLVMValueRef ToIndex(LLVMValueRef value)

@@ -1,23 +1,20 @@
-using System;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
 using BadLang.Core;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class SetHandler : ExpressionHandler
+public class SetHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public SetHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.Set;
 
     public override LLVMValueRef Compile(Expr expr)
     {
         var setExpr = (Expr.Set)expr;
         var builder = Session.Infrastructure.Builder;
-        var ctx = Session.Infrastructure.Context;
 
         var objVal = ExpressionCompiler.Compile(setExpr.Object);
         string? typeName = Session.LastExpressionType;

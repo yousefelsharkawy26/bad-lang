@@ -1,16 +1,14 @@
 using BadLang.Backend.LLVM.Core;
-using BadLang.Backend.LLVM.Infrastructure;
 using BadLang.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class AssignHandler : ExpressionHandler
+public class AssignHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public AssignHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.Assign;
 
     public override LLVMValueRef Compile(Expr expr)
@@ -45,18 +43,19 @@ public class AssignHandler : ExpressionHandler
                         TokenType.MinusEqual => builder.BuildFSub(left, right, "sub"),
                         TokenType.StarEqual => builder.BuildFMul(left, right, "mul"),
                         TokenType.SlashEqual => builder.BuildFDiv(left, right, "div"),
-                        _ => throw new System.Exception("Unsupported compound assignment")
+                        _ => throw new Exception("Unsupported compound assignment")
                     });
                 }
 
                 var setFn = Session.Infrastructure.Module.GetNamedFunction("badlang_list_set");
-                builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_list_set"), setFn, new[] { Session.ToPtr(targetObj, Session.VoidPtrType), Session.NumberToInt(indexValue), val }, "");
+                builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_list_set"), setFn, [Session.ToPtr(targetObj, Session.VoidPtrType), Session.NumberToInt(indexValue), val
+                ]);
                 return val;
             }
             // Add other indexable types if necessary
         }
 
-        if (targetPtr == null) throw new System.Exception("Invalid assignment target");
+        if (targetPtr == null) throw new Exception("Invalid assignment target");
 
         if (assignExpr.Operator.Type != TokenType.Equal)
         {
@@ -67,7 +66,7 @@ public class AssignHandler : ExpressionHandler
                 TokenType.MinusEqual => builder.BuildFSub(left, right, "sub"),
                 TokenType.StarEqual => builder.BuildFMul(left, right, "mul"),
                 TokenType.SlashEqual => builder.BuildFDiv(left, right, "div"),
-                _ => throw new System.Exception("Unsupported compound assignment")
+                _ => throw new Exception("Unsupported compound assignment")
             });
         }
 

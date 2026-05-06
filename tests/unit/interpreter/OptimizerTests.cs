@@ -14,7 +14,7 @@ public class OptimizerTests
     /// <summary>
     /// Helper: parse + build IR from BadLang source, returning raw IR nodes.
     /// </summary>
-    private List<IRNode> BuildIR(string source)
+    private List<IrNode> BuildIR(string source)
     {
         var lexer = new BadLang.Lexer.Lexer(source);
         var tokens = lexer.ScanTokens();
@@ -104,21 +104,21 @@ print(x);
     {
         // Directly test the pass at IR level
         var pass = new DeadCodeEliminationPass();
-        var ir = new List<IRNode>
+        var ir = new List<IrNode>
         {
             // _t0 = 42 (never read — should be eliminated)
-            new IRAssign { Target = "_t0", Value = new IRConst(42.0) },
+            new IrAssign { Target = "_t0", Value = new IrConst(42.0) },
             // _t1 = 10 (read by define)
-            new IRAssign { Target = "_t1", Value = new IRConst(10.0) },
-            new IRDefine { VariableName = "x", Value = new IRVar("_t1") }
+            new IrAssign { Target = "_t1", Value = new IrConst(10.0) },
+            new IrDefine { VariableName = "x", Value = new IrVar("_t1") }
         };
 
         var result = pass.Apply(ir);
 
         // _t0 assignment should be removed, _t1 and define kept
         Assert.Equal(2, result.Count);
-        Assert.IsType<IRAssign>(result[0]);
-        Assert.IsType<IRDefine>(result[1]);
+        Assert.IsType<IrAssign>(result[0]);
+        Assert.IsType<IrDefine>(result[1]);
     }
 
     [Fact]
@@ -126,9 +126,9 @@ print(x);
     {
         // Calls are side-effecting — never remove them even if target is unused
         var pass = new DeadCodeEliminationPass();
-        var ir = new List<IRNode>
+        var ir = new List<IrNode>
         {
-            new IRCall { Target = "_t0", FunctionName = "print", Arguments = new List<IRValue> { new IRConst("hi") } }
+            new IrCall { Target = "_t0", FunctionName = "print", Arguments = new List<IrValue> { new IrConst("hi") } }
         };
 
         var result = pass.Apply(ir);

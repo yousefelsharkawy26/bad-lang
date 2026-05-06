@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using BadLang.Core;
 using Spectre.Console;

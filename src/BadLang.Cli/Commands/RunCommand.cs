@@ -1,25 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using BadLang.Lexer;
-using BadLang.Parser;
 using BadLang.Semantic;
 using BadLang.Backend.Interpreter;
-using BadLang.Backend.LLVM;
 using BadLang.Cli.Diagnostics;
 using Spectre.Console;
 using BadLang.IR;
 
 namespace BadLang.Cli.Commands
 {
-    public class RunCommand
+    public class RunCommand(Interpreter interpreter)
     {
-        private readonly Interpreter _interpreter;
-
-        public RunCommand(Interpreter interpreter)
-        {
-            _interpreter = interpreter;
-        }
+        private readonly Interpreter _interpreter = interpreter;
 
         public void Execute(string path)
         {

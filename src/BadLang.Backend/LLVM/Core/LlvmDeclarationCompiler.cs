@@ -1,29 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BadLang.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Core;
 
-public class LlvmDeclarationCompiler
+public class LlvmDeclarationCompiler(CompilationSession session, ModuleLoader? moduleLoader)
 {
-    private readonly CompilationSession _session;
-    private readonly ModuleLoader? _moduleLoader;
-
-    public LlvmDeclarationCompiler(CompilationSession session, ModuleLoader? moduleLoader)
-    {
-        _session = session;
-        _moduleLoader = moduleLoader;
-    }
-
     public void DeclareStatements(List<Stmt> statements, string prefix = "")
     {
         var classStmts = statements.OfType<Stmt.Class>().ToDictionary(c => c.Name.Lexeme);
-        for (int i = 0; i < statements.Count; i++)
+        foreach (var t in statements)
         {
-            var stmt = statements[i];
+            var stmt = t;
             if (stmt is Stmt.Export exportStmt)
             {
                 stmt = exportStmt.Declaration;
@@ -66,7 +55,7 @@ public class LlvmDeclarationCompiler
                 interfaceMethods.Add((f.Name.Lexeme, f.ReturnType?.ToString() ?? "any"));
             }
         }
-        _session.Symbols.DefineInterface(ifaceStmt.Name.Lexeme, interfaceMethods);
+        session.Symbols.DefineInterface(ifaceStmt.Name.Lexeme, interfaceMethods);
     }
 
     private void DeclareImport(Stmt.Import importStmt, List<Stmt> allStatements)
@@ -81,14 +70,13 @@ public class LlvmDeclarationCompiler
             importKey = $"{modulePath} symbols {string.Join(",", importStmt.Symbols.Select(s => s.Lexeme))}";
         }
 
-        if (_session.Symbols.LoadedModules.Contains(importKey)) return;
-        _session.Symbols.LoadedModules.Add(importKey);
+        if (!session.Symbols.LoadedModules.Add(importKey)) return;
 
-        if (_moduleLoader != null)
+        if (moduleLoader != null)
         {
             try
             {
-                var moduleStatements = _moduleLoader.LoadModule(importStmt.Path);
+                var moduleStatements = moduleLoader.LoadModule(importStmt.Path);
                 
                 foreach (var s in moduleStatements)
                 {
@@ -108,14 +96,14 @@ public class LlvmDeclarationCompiler
 
                     if (name != null)
                     {
-                        if (importStmt.Symbols != null && !importStmt.Symbols.Any(sym => sym.Lexeme == name))
+                        if (importStmt.Symbols != null && importStmt.Symbols.All(sym => sym.Lexeme != name))
                             continue;
 
                         if (importStmt.Symbols == null && !isExported && !(inner is Stmt.Import))
                             continue; 
 
                         var finalName = importStmt.Symbols != null ? name : $"{effectiveAlias}.{name}";
-                        Token finalToken = null!;
+                        Token finalToken;
 
                         if (inner is Stmt.Function fun) {
                             finalToken = new Token(fun.Name.Type, finalName, fun.Name.Literal, fun.Name.Line, fun.Name.Column, fun.Name.Offset);
@@ -162,24 +150,24 @@ public class LlvmDeclarationCompiler
                 _ => "any"
             };
 
-            fieldTypes[i] = _session.Infrastructure.Context.Int64Type;
+            fieldTypes[i] = session.Infrastructure.Context.Int64Type;
             fieldInfo[field.Name.Lexeme] = (i, typeName);
         }
-        var structType = _session.Infrastructure.Context.CreateNamedStruct(fullName);
+        var structType = session.Infrastructure.Context.CreateNamedStruct(fullName);
         structType.StructSetBody(fieldTypes, false);
-        _session.Symbols.DefineType(fullName, structType, fieldInfo);
+        session.Symbols.DefineType(fullName, structType, fieldInfo);
     }
 
     private void DeclareEnum(Stmt.Enum enumStmt, string prefix = "")
     {
         string fullName = string.IsNullOrEmpty(prefix) ? enumStmt.Name.Lexeme : $"{prefix}.{enumStmt.Name.Lexeme}";
-        _session.Symbols.DefineEnum(fullName, enumStmt.Variants.Select(m => m.Lexeme).ToList());
+        session.Symbols.DefineEnum(fullName, enumStmt.Variants.Select(m => m.Lexeme).ToList());
     }
 
     private void DeclareClassRecursive(Stmt.Class classStmt, Dictionary<string, Stmt.Class> classStmts, string prefix = "")
     {
         string fullName = string.IsNullOrEmpty(prefix) ? classStmt.Name.Lexeme : $"{prefix}.{classStmt.Name.Lexeme}";
-        if (_session.Symbols.HasType(fullName)) return;
+        if (session.Symbols.HasType(fullName)) return;
 
         string? parentName = classStmt.Parents.Count > 0 ? classStmt.Parents[0].Lexeme : null;
         if (parentName != null)
@@ -189,25 +177,23 @@ public class LlvmDeclarationCompiler
                 DeclareClassRecursive(parentStmt, classStmts, prefix);
             }
             
-            if (!string.IsNullOrEmpty(prefix) && !_session.Symbols.HasType(parentName) && _session.Symbols.HasType($"{prefix}.{parentName}"))
+            if (!string.IsNullOrEmpty(prefix) && !session.Symbols.HasType(parentName) && session.Symbols.HasType($"{prefix}.{parentName}"))
             {
                 parentName = $"{prefix}.{parentName}";
             }
         }
 
         var fieldInfo = new Dictionary<string, (int Index, string? TypeName)>();
-        var fieldTypes = new List<LLVMTypeRef>();
+        var fieldTypes = new List<LLVMTypeRef> { session.VoidPtrType };
 
-        fieldTypes.Add(_session.VoidPtrType);
-
-        if (parentName != null && _session.Symbols.TryGetType(parentName, out var parentClass))
+        if (parentName != null && session.Symbols.TryGetType(parentName, out var parentClass))
         {
             if (parentClass.Fields != null)
             {
                 foreach (var kvp in parentClass.Fields.OrderBy(x => x.Value.Index))
                 {
                     fieldInfo[kvp.Key] = kvp.Value;
-                    fieldTypes.Add(_session.Infrastructure.Context.DoubleType);
+                    fieldTypes.Add(session.Infrastructure.Context.DoubleType);
                 }
             }
         }
@@ -216,7 +202,7 @@ public class LlvmDeclarationCompiler
         int baseIndex = fieldTypes.Count;
         for (int i = 0; i < localFieldStmts.Count; i++)
         {
-            fieldTypes.Add(_session.Infrastructure.Context.DoubleType);
+            fieldTypes.Add(session.Infrastructure.Context.DoubleType);
             string ft = localFieldStmts[i].Type switch
             {
                 TypeNode.UserDefined u => u.Name.Lexeme,
@@ -227,13 +213,13 @@ public class LlvmDeclarationCompiler
             fieldInfo[localFieldStmts[i].Name.Lexeme] = (baseIndex + i, ft);
         }
 
-        var structType = _session.Infrastructure.Context.CreateNamedStruct(fullName);
+        var structType = session.Infrastructure.Context.CreateNamedStruct(fullName);
         structType.StructSetBody(fieldTypes.ToArray(), false);
 
         var vtableOffsets = new Dictionary<string, int>();
         var vtableImpls = new Dictionary<string, string>();
 
-        if (parentName != null && _session.Symbols.TryGetType(parentName, out var pc))
+        if (parentName != null && session.Symbols.TryGetType(parentName, out var pc))
         {
             if (pc.VTableOffsets != null)
             {
@@ -250,16 +236,16 @@ public class LlvmDeclarationCompiler
             var mangledName = $"{fullName}__{methodName}";
 
             var paramTypes = new LLVMTypeRef[member.Params.Count + 1];
-            paramTypes[0] = _session.VoidPtrType; 
+            paramTypes[0] = session.VoidPtrType; 
             for (int i = 0; i < member.Params.Count; i++)
-                paramTypes[i + 1] = _session.Infrastructure.Context.Int64Type;
+                paramTypes[i + 1] = session.Infrastructure.Context.Int64Type;
 
-            var methodType = LLVMTypeRef.CreateFunction(_session.Infrastructure.Context.Int64Type, paramTypes);
+            var methodType = LLVMTypeRef.CreateFunction(session.Infrastructure.Context.Int64Type, paramTypes);
             string? retTypeName = GetTypeName(member.ReturnType);
-            _session.Symbols.DefineFunction(mangledName, methodType, retTypeName);
-            _session.Infrastructure.Module.AddFunction(mangledName, methodType);
+            session.Symbols.DefineFunction(mangledName, methodType, retTypeName);
+            session.Infrastructure.Module.AddFunction(mangledName, methodType);
 
-            int globalIdx = _session.Symbols.GetMethodIndex(methodName);
+            int globalIdx = session.Symbols.GetMethodIndex(methodName);
             if (globalIdx != -1)
             {
                 vtableOffsets[methodName] = globalIdx;
@@ -267,7 +253,7 @@ public class LlvmDeclarationCompiler
             }
         }
 
-        var vtableFuncPtrType = _session.VoidPtrType;
+        var vtableFuncPtrType = session.VoidPtrType;
         int maxIndex = vtableOffsets.Values.DefaultIfEmpty(-1).Max();
         var vtableArrayType = LLVMTypeRef.CreateArray(vtableFuncPtrType, (uint)(maxIndex + 1));
 
@@ -281,17 +267,17 @@ public class LlvmDeclarationCompiler
         {
             if (vtableImpls.TryGetValue(kvp.Key, out var implName))
             {
-                var func = _session.Infrastructure.Module.GetNamedFunction(implName);
+                var func = session.Infrastructure.Module.GetNamedFunction(implName);
                 vtableConsts[kvp.Value] = LLVMValueRef.CreateConstBitCast(func, vtableFuncPtrType);
             }
         }
 
         var vtableValue = LLVMValueRef.CreateConstArray(vtableFuncPtrType, vtableConsts);
-        var vtableGlobal = _session.Infrastructure.Module.AddGlobal(vtableArrayType, $"{fullName}_vtable");
+        var vtableGlobal = session.Infrastructure.Module.AddGlobal(vtableArrayType, $"{fullName}_vtable");
         vtableGlobal.Initializer = vtableValue;
         vtableGlobal.IsGlobalConstant = true;
 
-        _session.Symbols.DefineType(fullName, structType, fieldInfo, parentName, vtableOffsets, vtableGlobal);
+        session.Symbols.DefineType(fullName, structType, fieldInfo, parentName, vtableOffsets, vtableGlobal);
     }
 
     private void DeclareFunction(Stmt.Function funcStmt, string prefix = "")
@@ -300,16 +286,16 @@ public class LlvmDeclarationCompiler
         
         var paramTypes = new LLVMTypeRef[funcStmt.Params.Count];
         for (int i = 0; i < funcStmt.Params.Count; i++)
-            paramTypes[i] = _session.Infrastructure.Context.Int64Type;
+            paramTypes[i] = session.Infrastructure.Context.Int64Type;
 
-        var funcType = LLVMTypeRef.CreateFunction(_session.Infrastructure.Context.Int64Type, paramTypes);
-        _session.Symbols.DefineFunction(fullName, funcType, GetTypeName(funcStmt.ReturnType));
-        _session.Infrastructure.Module.AddFunction(fullName, funcType);
+        var funcType = LLVMTypeRef.CreateFunction(session.Infrastructure.Context.Int64Type, paramTypes);
+        session.Symbols.DefineFunction(fullName, funcType, GetTypeName(funcStmt.ReturnType));
+        session.Infrastructure.Module.AddFunction(fullName, funcType);
     }
 
     public void DeclareRuntime()
     {
-        _session.Runtime.DeclareRuntime(_session.Infrastructure.Module, _session.Infrastructure.Context);
+        session.Runtime.DeclareRuntime(session.Infrastructure.Module, session.Infrastructure.Context);
     }
 
     private string? GetTypeName(TypeNode? type)

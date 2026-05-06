@@ -1,15 +1,14 @@
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
 using BadLang.Core;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class UnaryHandler : ExpressionHandler
+public class UnaryHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public UnaryHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.Unary;
 
     public override LLVMValueRef Compile(Expr expr)

@@ -1,19 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using BadLang.Backend.LLVM.Abstractions;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
 using BadLang.Core;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class MethodCallHandler : ExpressionHandler
+public class MethodCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public MethodCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
-    public override bool CanHandle(Expr expr) => expr is Expr.Call call && call.Callee is Expr.Get;
+    public override bool CanHandle(Expr expr) => expr is Expr.Call { Callee: Expr.Get };
 
     public override LLVMValueRef Compile(Expr expr)
     {
@@ -21,7 +18,6 @@ public class MethodCallHandler : ExpressionHandler
         var getExpr = (Expr.Get)callExpr.Callee;
         var builder = Session.Infrastructure.Builder;
         var ctx = Session.Infrastructure.Context;
-        var module = Session.Infrastructure.Module;
 
         if (getExpr.Object is Expr.Variable vNamespace)
         {
@@ -57,7 +53,7 @@ public class MethodCallHandler : ExpressionHandler
                 for (int i = 0; i < callExpr.Arguments.Count; i++)
                     paramTypes[i + 1] = ctx.Int64Type;
 
-                var methodType = LLVMTypeRef.CreateFunction(retType, paramTypes, false);
+                var methodType = LLVMTypeRef.CreateFunction(retType, paramTypes);
                 var methodFunc = builder.BuildBitCast(methodPtr, LLVMTypeRef.CreatePointer(methodType, 0), "vmethod_func_cast");
 
                 var methodArgs = new LLVMValueRef[callExpr.Arguments.Count + 1];
@@ -84,7 +80,7 @@ public class MethodCallHandler : ExpressionHandler
                 var methodPtrPtr = builder.BuildGEP2(vtableFuncPtrType, vtableBase, new[] { LLVMValueRef.CreateConstInt(ctx.Int64Type, (ulong)offset) }, "vmethod_ptr_ptr");
                 var methodPtr = builder.BuildLoad2(vtableFuncPtrType, methodPtrPtr, "vmethod_ptr");
 
-                Abstractions.FunctionInfo methodFuncInfo = default;
+                FunctionInfo methodFuncInfo = default;
                 string? searchType = objTypeName;
                 while (searchType != null && Session.Symbols.TryGetType(searchType, out var sc))
                 {
@@ -106,10 +102,8 @@ public class MethodCallHandler : ExpressionHandler
                 Session.LastExpressionType = methodFuncInfo.ReturnTypeName;
                 return Session.ToI64(builder.BuildCall2(methodFuncInfo.Type, methodFunc, methodArgs, "vcall"));
             }
-            else
-            {
-                throw new CompileError($"Class '{objTypeName}' has no method '{getExpr.Name.Lexeme}'", getExpr.Name);
-            }
+
+            throw new CompileError($"Class '{objTypeName}' has no method '{getExpr.Name.Lexeme}'", getExpr.Name);
         }
         throw new CompileError($"Cannot call method on non-class type '{objTypeName ?? "unknown"}'", getExpr.Name);
     }
@@ -171,7 +165,7 @@ public class MethodCallHandler : ExpressionHandler
             var listVal = Session.ToPtr(ExpressionCompiler.Compile(arguments[0]), Session.VoidPtrType);
             var itemVal = ExpressionCompiler.Compile(arguments[1]);
             var rtFn = module.GetNamedFunction("badlang_list_push");
-            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_list_push"), rtFn, new[] { listVal, itemVal }, "");
+            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_list_push"), rtFn, [listVal, itemVal]);
             Session.LastExpressionType = "null";
             return Session.ToI64(LLVMValueRef.CreateConstReal(ctx.DoubleType, 0.0));
         }
@@ -189,7 +183,7 @@ public class MethodCallHandler : ExpressionHandler
             var idx = Session.NumberToInt(ExpressionCompiler.Compile(arguments[1]));
             var item = ExpressionCompiler.Compile(arguments[2]);
             var rtFn = module.GetNamedFunction("badlang_list_set");
-            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_list_set"), rtFn, new[] { listVal, idx, item }, "");
+            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_list_set"), rtFn, [listVal, idx, item]);
             Session.LastExpressionType = "null";
             return Session.ToI64(LLVMValueRef.CreateConstReal(ctx.DoubleType, 0.0));
         }
@@ -238,7 +232,7 @@ public class MethodCallHandler : ExpressionHandler
         {
             var file = Session.ToPtr(ExpressionCompiler.Compile(arguments[0]), Session.VoidPtrType);
             var rtFn = module.GetNamedFunction("badlang_file_close");
-            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_file_close"), rtFn, new[] { file }, "");
+            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_file_close"), rtFn, [file]);
             Session.LastExpressionType = "null";
             return Session.ToI64(LLVMValueRef.CreateConstReal(ctx.DoubleType, 0.0));
         }
@@ -292,7 +286,7 @@ public class MethodCallHandler : ExpressionHandler
             var keyVal = Session.ToI64(ExpressionCompiler.Compile(arguments[1]));
             var valVal = Session.ToI64(ExpressionCompiler.Compile(arguments[2]));
             var rtFn = module.GetNamedFunction("badlang_map_set");
-            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_map_set"), rtFn, new[] { mapVal, keyVal, valVal }, "");
+            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_map_set"), rtFn, [mapVal, keyVal, valVal]);
             Session.LastExpressionType = "null";
             return Session.ToI64(LLVMValueRef.CreateConstReal(ctx.DoubleType, 0.0));
         }

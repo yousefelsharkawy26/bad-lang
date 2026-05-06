@@ -1,17 +1,15 @@
-using System;
 using BadLang.IR;
-using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.ControlFlow;
 
-public class CondJumpHandler : IIRNodeHandler
+public class CondJumpHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRCondJump) };
-    public bool CanHandle(IRNode node) => node is IRCondJump;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrCondJump)];
+    public bool CanHandle(IrNode node) => node is IrCondJump;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var cjmp = (IRCondJump)node;
+        var cjmp = (IrCondJump)node;
         bool cond = Evaluator.IsTruthy(context.Eval(cjmp.Condition));
         var targetLabel = cond ? cjmp.TrueLabel : cjmp.FalseLabel;
         

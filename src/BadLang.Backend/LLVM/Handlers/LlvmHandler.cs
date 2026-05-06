@@ -1,5 +1,6 @@
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers;
@@ -14,36 +15,27 @@ public interface IStatementCompiler
     void Compile(Stmt stmt);
 }
 
-public abstract class LlvmHandler
+public abstract class LlvmHandler(CompilationSession session)
 {
-    protected readonly CompilationSession Session;
-
-    protected LlvmHandler(CompilationSession session)
-    {
-        Session = session;
-    }
+    protected readonly CompilationSession Session = session;
 }
 
-public abstract class ExpressionHandler : LlvmHandler
+public abstract class ExpressionHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : LlvmHandler(session)
 {
-    protected readonly IExpressionCompiler ExpressionCompiler;
-    protected ExpressionHandler(CompilationSession session, IExpressionCompiler expressionCompiler) : base(session) 
-    { 
-        ExpressionCompiler = expressionCompiler;
-    }
+    protected readonly IExpressionCompiler ExpressionCompiler = expressionCompiler;
     public abstract bool CanHandle(Expr expr);
     public abstract LLVMValueRef Compile(Expr expr);
 }
 
-public abstract class StatementHandler : LlvmHandler
+public abstract class StatementHandler(
+    CompilationSession session,
+    IStatementCompiler statementCompiler,
+    IExpressionCompiler expressionCompiler)
+    : LlvmHandler(session)
 {
-    protected readonly IStatementCompiler StatementCompiler;
-    protected readonly IExpressionCompiler ExpressionCompiler;
-    protected StatementHandler(CompilationSession session, IStatementCompiler statementCompiler, IExpressionCompiler expressionCompiler) : base(session) 
-    { 
-        StatementCompiler = statementCompiler;
-        ExpressionCompiler = expressionCompiler;
-    }
+    protected readonly IStatementCompiler StatementCompiler = statementCompiler;
+    protected readonly IExpressionCompiler ExpressionCompiler = expressionCompiler;
     public abstract bool CanHandle(Stmt stmt);
     public abstract void Compile(Stmt stmt);
 }

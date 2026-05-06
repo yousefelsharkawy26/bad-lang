@@ -1,6 +1,6 @@
 using BadLang.Core;
 
-namespace BadLang.Parser;
+namespace BadLang.Parser.Ast;
 
 public abstract record TypeNode
 {
@@ -56,7 +56,7 @@ public abstract record Stmt
     public record Return(Token Keyword, Expr? Value) : Stmt;
     public record Class(Token Name, IReadOnlyList<Token> Generics, IReadOnlyList<Token> Parents, IReadOnlyList<Stmt> Members) : Stmt;
     public record Interface(Token Name, IReadOnlyList<Token> Generics, IReadOnlyList<Stmt> Signatures) : Stmt;
-    public record Struct(Token Name, IReadOnlyList<Stmt.Var> Fields) : Stmt;
+    public record Struct(Token Name, IReadOnlyList<Var> Fields) : Stmt;
     public record Enum(Token Name, IReadOnlyList<Token> Variants) : Stmt;
     public record Switch(Expr Expr, IReadOnlyList<CaseClause> Cases, IReadOnlyList<Stmt>? DefaultBranch) : Stmt;
     public record TryCatch(IReadOnlyList<Stmt> TryBlock, IReadOnlyList<CatchClause> CatchClauses, IReadOnlyList<Stmt>? FinallyBlock) : Stmt;

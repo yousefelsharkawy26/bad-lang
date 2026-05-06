@@ -1,36 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 using BadLang.Core;
-using BadLang.Lexer;
+using BadLang.Parser.Ast;
 
 namespace BadLang.Parser;
 
-public class ModuleLoader
+public class ModuleLoader(string basePath)
 {
     private readonly Dictionary<string, IReadOnlyList<Stmt>> _cache = new();
-    private readonly string _basePath;
 
-    public string BasePath => _basePath;
-
-    public ModuleLoader(string basePath)
-    {
-        _basePath = basePath;
-    }
+    public string BasePath => basePath;
 
     public string? Resolve(string path)
     {
         string relativePath = path.Replace('.', Path.DirectorySeparatorChar) + ".bad";
-        string fullPath = Path.Combine(_basePath, relativePath);
+        string fullPath = Path.Combine(basePath, relativePath);
 
         if (File.Exists(fullPath)) return fullPath;
 
         if (path.StartsWith("stdlib."))
         {
             string modulePath = path.Substring(7).Replace('.', Path.DirectorySeparatorChar) + ".bad";
-            string? searchDir = _basePath;
+            string? searchDir = basePath;
             while (searchDir != null)
             {
                 string stdlibRoot = Path.Combine(searchDir, "stdlib");
@@ -42,7 +31,7 @@ public class ModuleLoader
 
                     // 2. Try subdirectories
                     string moduleName = Path.GetFileName(modulePath);
-                    string[] subDirs = { "core", "collections", "system" };
+                    string[] subDirs = ["core", "collections", "system"];
                     foreach (var subDir in subDirs)
                     {
                         string candidate = Path.Combine(stdlibRoot, subDir, moduleName);
@@ -53,7 +42,7 @@ public class ModuleLoader
             }
         }
 
-        string? currentDir = _basePath;
+        string? currentDir = basePath;
         while (currentDir != null)
         {
             string candidate = Path.Combine(currentDir, relativePath);

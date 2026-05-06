@@ -1,16 +1,16 @@
-using System;
 using BadLang.Backend.LLVM.Core;
-using BadLang.Backend.LLVM.Infrastructure;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.StatementHandlers;
 
-public class WhileStatementHandler : StatementHandler
+public class WhileStatementHandler(
+    CompilationSession session,
+    IStatementCompiler statementCompiler,
+    IExpressionCompiler expressionCompiler)
+    : StatementHandler(session, statementCompiler, expressionCompiler)
 {
-    public WhileStatementHandler(CompilationSession session, IStatementCompiler statementCompiler, IExpressionCompiler expressionCompiler) 
-        : base(session, statementCompiler, expressionCompiler) { }
-
     public override bool CanHandle(Stmt stmt) => stmt is Stmt.While;
 
     public override void Compile(Stmt stmt)

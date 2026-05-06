@@ -1,18 +1,17 @@
-using System;
 using BadLang.IR;
 using BadLang.Core;
 using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Objects;
 
-public class PropertySetHandler : IIRNodeHandler
+public class PropertySetHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRPropertySet) };
-    public bool CanHandle(IRNode node) => node is IRPropertySet;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrPropertySet)];
+    public bool CanHandle(IrNode node) => node is IrPropertySet;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var pset = (IRPropertySet)node;
+        var pset = (IrPropertySet)node;
         var obj = context.Eval(pset.Object);
         var val = context.Eval(pset.Value);
 

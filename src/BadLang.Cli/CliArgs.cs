@@ -41,7 +41,7 @@ public sealed record CliArgs(
                     lspMode = true;
                     break;
 
-                case string a when a.StartsWith("-O") && a.Length == 3 && "0123".Contains(a[2]):
+                case { } a when a.StartsWith("-O") && a.Length == 3 && "0123".Contains(a[2]):
                     optLevel = a[2].ToString();
                     break;
 

@@ -1,15 +1,13 @@
-using System.Collections.Generic;
 using System.Text;
 using BadLang.Core;
 
 namespace BadLang.Lexer;
 
-public class Lexer
+public class Lexer(string source)
 {
-    private readonly string _source;
     private readonly List<Token> _tokens = new();
-    private int _start = 0;
-    private int _current = 0;
+    private int _start;
+    private int _current;
     private int _line = 1;
     private int _column = 1;
 
@@ -70,11 +68,6 @@ public class Lexer
         { "super", TokenType.Super }
     };
 
-    public Lexer(string source)
-    {
-        _source = source;
-    }
-
     public List<Token> ScanTokens()
     {
         while (!IsAtEnd())
@@ -106,8 +99,7 @@ public class Lexer
             case '.':
                 if (Match('.'))
                 {
-                    if (Match('=')) AddToken(TokenType.DotDotEqual);
-                    else AddToken(TokenType.DotDot);
+                    AddToken(Match('=') ? TokenType.DotDotEqual : TokenType.DotDot);
                 }
                 else
                 {
@@ -178,13 +170,11 @@ public class Lexer
                 break;
 
             case '&':
-                if (Match('&')) AddToken(TokenType.And);
-                else AddToken(TokenType.Ampersand);
+                AddToken(Match('&') ? TokenType.And : TokenType.Ampersand);
                 break;
 
             case '|':
-                if (Match('|')) AddToken(TokenType.Or);
-                else AddToken(TokenType.Pipe);
+                AddToken(Match('|') ? TokenType.Or : TokenType.Pipe);
                 break;
 
             case '$':
@@ -276,7 +266,7 @@ public class Lexer
             while (char.IsDigit(Peek())) Advance();
         }
 
-        string text = _source.Substring(_start, _current - _start);
+        string text = source.Substring(_start, _current - _start);
         AddToken(TokenType.Number, double.Parse(text));
     }
 
@@ -284,46 +274,43 @@ public class Lexer
     {
         while (char.IsLetterOrDigit(Peek()) || Peek() == '_') Advance();
 
-        string text = _source.Substring(_start, _current - _start);
-        if (!Keywords.TryGetValue(text, out TokenType type))
-        {
-            type = TokenType.Identifier;
-        }
+        string text = source.Substring(_start, _current - _start);
+        TokenType type = Keywords.GetValueOrDefault(text, TokenType.Identifier);
         AddToken(type);
     }
 
-    private bool IsAtEnd() => _current >= _source.Length;
+    private bool IsAtEnd() => _current >= source.Length;
 
     private char Advance()
     {
         _column++;
-        return _source[_current++];
+        return source[_current++];
     }
 
     private void AddToken(TokenType type) => AddToken(type, null);
 
     private void AddToken(TokenType type, object? literal)
     {
-        string text = _source.Substring(_start, _current - _start);
+        string text = source.Substring(_start, _current - _start);
         _tokens.Add(new Token(type, text, literal, _line, _column, _start));
     }
 
     private bool Match(char expected)
     {
         if (IsAtEnd()) return false;
-        if (_source[_current] != expected) return false;
+        if (source[_current] != expected) return false;
 
         _current++;
         _column++;
         return true;
     }
 
-    private char Peek() => IsAtEnd() ? '\0' : _source[_current];
+    private char Peek() => IsAtEnd() ? '\0' : source[_current];
 
     private char PeekNext()
     {
-        if (_current + 1 >= _source.Length) return '\0';
-        return _source[_current + 1];
+        if (_current + 1 >= source.Length) return '\0';
+        return source[_current + 1];
     }
     private void ScanInterpolatedString()
     {
@@ -340,7 +327,7 @@ public class Lexer
         }
 
         Advance();
-        string value = _source.Substring(_start + 2, _current - _start - 3);
+        string value = source.Substring(_start + 2, _current - _start - 3);
         AddToken(TokenType.InterpolatedString, value);
     }
 }

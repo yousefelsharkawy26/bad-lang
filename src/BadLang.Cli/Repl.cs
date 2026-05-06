@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Text;
-using BadLang.Lexer;
-using BadLang.Parser;
 using BadLang.Semantic;
 using BadLang.Backend.Interpreter;
 using BadLang.Backend.Interpreter.Runtime;
@@ -12,17 +8,12 @@ using BadLang.IR;
 
 namespace BadLang.Cli;
 
-public class Repl
+public class Repl(Interpreter interpreter)
 {
-    private readonly Interpreter _interpreter;
+    private readonly Interpreter _interpreter = interpreter;
     private readonly List<string> _history = new();
     private readonly TypeChecker _typeChecker = new();
     private int _historyIndex = -1;
-
-    public Repl(Interpreter interpreter)
-    {
-        _interpreter = interpreter;
-    }
 
     public void Run()
     {
@@ -37,7 +28,7 @@ public class Repl
         while (true)
         {
             string line = ReadLine();
-            if (line == null || line == "exit") break;
+            if (line == "exit") break;
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             if (line == "clear")
@@ -58,8 +49,8 @@ public class Repl
         StringBuilder input = new();
         int cursorPosition = 0;
 
-        Console.Write("badlang> ");
-
+        AnsiConsole.Markup("\n[gray]badlang[/] > ");
+        AnsiConsole.Write("");
         while (true)
         {
             var keyInfo = Console.ReadKey(true);
@@ -143,7 +134,6 @@ public class Repl
     private void RedrawLine(string input, int cursorPosition)
     {
         // Clear current line
-        int left = Console.CursorLeft;
         int top = Console.CursorTop;
         
         Console.SetCursorPosition(9, top); // "badlang> " is 9 chars
@@ -181,7 +171,7 @@ public class Repl
                 return;
             }
 
-            if (statements == null || statements.Count == 0) return;
+            if (statements.Count == 0) return;
 
             // Type check with persistent checker — show warnings but don't block execution
             _typeChecker.Check(statements);
@@ -204,8 +194,7 @@ public class Repl
         }
         catch (RuntimeException ex)
         {
-             if (ex.Token != null) ErrorRenderer.Render(source, ex.Token, ex.Message);
-             else AnsiConsole.MarkupLine($"[red]Runtime Error:[/] {ex.Message}");
+            ErrorRenderer.Render(source, ex.Token, ex.Message);
         }
         catch (Exception ex)
         {

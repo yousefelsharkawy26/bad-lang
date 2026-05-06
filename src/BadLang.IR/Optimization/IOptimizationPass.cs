@@ -18,5 +18,5 @@ public interface IOptimizationPass
     /// Apply this optimization pass to the given IR nodes.
     /// Returns a new list — the input list is never mutated.
     /// </summary>
-    IReadOnlyList<IRNode> Apply(IReadOnlyList<IRNode> nodes);
+    IReadOnlyList<IrNode> Apply(IReadOnlyList<IrNode> nodes);
 }

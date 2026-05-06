@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using BadLang.Parser;
-using BadLang.Backend.Interpreter.Runtime;
 using BadLang.Core;
 
 namespace BadLang.Backend.Interpreter.Runtime;

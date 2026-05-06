@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace BadLang.Backend.Interpreter.Runtime;
 
 public interface IBadLangCallable

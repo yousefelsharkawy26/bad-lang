@@ -1,21 +1,16 @@
-using System;
-using System.Collections.Generic;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class LambdaHandler : ExpressionHandler
+public class LambdaHandler(
+    CompilationSession session,
+    IExpressionCompiler expressionCompiler,
+    IStatementCompiler statementCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    private readonly IStatementCompiler _statementCompiler;
-
-    public LambdaHandler(CompilationSession session, IExpressionCompiler expressionCompiler, IStatementCompiler statementCompiler) 
-        : base(session, expressionCompiler)
-    {
-        _statementCompiler = statementCompiler;
-    }
-
     public override bool CanHandle(Expr expr) => expr is Expr.Lambda;
 
     public override LLVMValueRef Compile(Expr expr)
@@ -39,7 +34,7 @@ public class LambdaHandler : ExpressionHandler
         {
             paramTypes[i + 1] = ctx.Int64Type;
         }
-        var funcType = LLVMTypeRef.CreateFunction(ctx.Int64Type, paramTypes, false);
+        var funcType = LLVMTypeRef.CreateFunction(ctx.Int64Type, paramTypes);
         var func = module.AddFunction(funcName, funcType);
 
         var entry = func.AppendBasicBlock("entry");
@@ -86,7 +81,7 @@ public class LambdaHandler : ExpressionHandler
         {
             foreach (var stmt in lambda.Body)
             {
-                _statementCompiler.Compile(stmt);
+                statementCompiler.Compile(stmt);
             }
             if (builder.InsertBlock.Terminator.Handle == IntPtr.Zero)
             {
@@ -97,10 +92,10 @@ public class LambdaHandler : ExpressionHandler
         Session.Symbols.PopScope();
         builder.PositionAtEnd(savedBlock);
 
-        var badlang_closure_alloc = module.GetNamedFunction("badlang_closure_alloc");
+        var badlangClosureAlloc = module.GetNamedFunction("badlang_closure_alloc");
         var funcPtrAsVoid = builder.BuildBitCast(func, Session.VoidPtrType, "func_ptr");
         var countVal = LLVMValueRef.CreateConstInt(ctx.Int32Type, (ulong)capturedVars.Count);
-        var allocatedClosure = builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_closure_alloc"), badlang_closure_alloc, new[] { funcPtrAsVoid, countVal }, "closure_alloc");
+        var allocatedClosure = builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_closure_alloc"), badlangClosureAlloc, new[] { funcPtrAsVoid, countVal }, "closure_alloc");
         var typedAllocClosure = builder.BuildBitCast(allocatedClosure, closurePtrType, "typed_closure");
 
         for (int i = 0; i < capturedVars.Count; i++)

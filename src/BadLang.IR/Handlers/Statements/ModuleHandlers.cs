@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 
 namespace BadLang.IR.Handlers.Statements
 {
     public class ExportStmtHandler : IStmtBuildHandler
     {
         public Type TargetType => typeof(Stmt.Export);
-        public void Build(Stmt stmt, List<IRNode> ir, IIRBuilderContext context)
+        public void Build(Stmt stmt, List<IrNode> ir, IIRBuilderContext context)
         {
             var exportStmt = (Stmt.Export)stmt;
             // Build the inner declaration first
@@ -18,7 +19,7 @@ namespace BadLang.IR.Handlers.Statements
             string? name = context.GetExportName(exportStmt.Declaration);
             if (name != null)
             {
-                ir.Add(new IRExport { Name = name });
+                ir.Add(new IrExport { Name = name });
             }
         }
     }
@@ -26,12 +27,12 @@ namespace BadLang.IR.Handlers.Statements
     public class ExportListStmtHandler : IStmtBuildHandler
     {
         public Type TargetType => typeof(Stmt.ExportList);
-        public void Build(Stmt stmt, List<IRNode> ir, IIRBuilderContext context)
+        public void Build(Stmt stmt, List<IrNode> ir, IIRBuilderContext context)
         {
             var exportListStmt = (Stmt.ExportList)stmt;
             foreach (var symbol in exportListStmt.Symbols)
             {
-                ir.Add(new IRExport { Name = symbol.Lexeme });
+                ir.Add(new IrExport { Name = symbol.Lexeme });
             }
         }
     }
@@ -39,7 +40,7 @@ namespace BadLang.IR.Handlers.Statements
     public class ImportStmtHandler : IStmtBuildHandler
     {
         public Type TargetType => typeof(Stmt.Import);
-        public void Build(Stmt stmt, List<IRNode> ir, IIRBuilderContext context)
+        public void Build(Stmt stmt, List<IrNode> ir, IIRBuilderContext context)
         {
             var importStmt = (Stmt.Import)stmt;
             var pathStr = string.Join(".", importStmt.Path.Select(t => t.Lexeme));
@@ -52,7 +53,7 @@ namespace BadLang.IR.Handlers.Statements
                 alias = pathStr;
             }
 
-            ir.Add(new IRImport 
+            ir.Add(new IrImport 
             { 
                 Path = pathStr, 
                 Alias = alias,

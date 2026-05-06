@@ -1,19 +1,16 @@
 using BadLang.Backend.LLVM.Core;
-using BadLang.Backend.LLVM.Infrastructure;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
-using System;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class PrintCallHandler : ExpressionHandler
+public class PrintCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public PrintCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) 
     {
-        return expr is Expr.Call call && call.Callee is Expr.Variable v && (v.Name.Lexeme == "print" || v.Name.Lexeme == "println");
+        return expr is Expr.Call { Callee: Expr.Variable v } && (v.Name.Lexeme == "print" || v.Name.Lexeme == "println");
     }
 
     public override LLVMValueRef Compile(Expr expr)
@@ -42,37 +39,37 @@ public class PrintCallHandler : ExpressionHandler
             {
                 var strPrint = module.GetNamedFunction("badlang_str_print");
                 var strPrintType = Session.Runtime.GetRuntimeType("badlang_str_print");
-                builder.BuildCall2(strPrintType, strPrint, new[] { Session.ToI64(Session.ToPtr(arg, Session.StringPtrType)) }, "");
+                builder.BuildCall2(strPrintType, strPrint, [Session.ToI64(Session.ToPtr(arg, Session.StringPtrType))]);
                 
                 if (i < callExpr.Arguments.Count - 1)
                 {
                     var formatStr = builder.BuildGlobalStringPtr(" ", "space");
-                    builder.BuildCall2(printfType, printf, new[] { formatStr }, "");
+                    builder.BuildCall2(printfType, printf, [formatStr]);
                 }
             }
             else if (Session.LastExpressionType == "any" || Session.LastExpressionType == null)
             {
                 var printVal = module.GetNamedFunction("badlang_print_value");
                 var printValType = Session.Runtime.GetRuntimeType("badlang_print_value");
-                builder.BuildCall2(printValType, printVal, new[] { arg }, "");
+                builder.BuildCall2(printValType, printVal, [arg]);
                 
                 if (i < callExpr.Arguments.Count - 1)
                 {
                     var formatStr = builder.BuildGlobalStringPtr(" ", "space");
-                    builder.BuildCall2(printfType, printf, new[] { formatStr }, "");
+                    builder.BuildCall2(printfType, printf, [formatStr]);
                 }
             }
             else
             {
                 var formatStr = builder.BuildGlobalStringPtr(i < callExpr.Arguments.Count - 1 ? "%g " : "%g", "formatStr");
-                builder.BuildCall2(printfType, printf, new[] { formatStr, Session.ToDouble(arg) }, "");
+                builder.BuildCall2(printfType, printf, [formatStr, Session.ToDouble(arg)]);
             }
         }
 
         if (v.Name.Lexeme == "println")
         {
             var nlFormat = builder.BuildGlobalStringPtr("\n", "fmt_nl");
-            builder.BuildCall2(printfType, printf, new[] { nlFormat }, "");
+            builder.BuildCall2(printfType, printf, [nlFormat]);
         }
 
         return lastArg;

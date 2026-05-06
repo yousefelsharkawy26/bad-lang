@@ -1,24 +1,23 @@
-using System;
-using System.Collections.Generic;
 using BadLang.IR;
 
 namespace BadLang.Backend.Interpreter;
 
 public class HandlerRegistry
 {
-    private readonly Dictionary<Type, IIRNodeHandler> _handlers = new();
+    private readonly Dictionary<Type, IIrNodeHandler> _handlers = new();
 
-    public HandlerRegistry() { }
-
-    public HandlerRegistry(IEnumerable<IIRNodeHandler> handlers)
+    public HandlerRegistry(IEnumerable<IIrNodeHandler>? handlers = null)
     {
+        if  (handlers == null)
+            return;
+        
         foreach (var handler in handlers)
         {
             Register(handler);
         }
     }
 
-    public void Register(IIRNodeHandler handler)
+    private void Register(IIrNodeHandler handler)
     {
         foreach (var type in handler.GetHandledTypes())
         {
@@ -26,21 +25,21 @@ public class HandlerRegistry
         }
     }
 
-    public void Register<T>(IIRNodeHandler handler) where T : IRNode
+    public void Register<T>(IIrNodeHandler handler) where T : IrNode
     {
         _handlers[typeof(T)] = handler;
     }
 
-    public void Register(Type type, IIRNodeHandler handler)
+    public void Register(Type type, IIrNodeHandler handler)
     {
-        if (!typeof(IRNode).IsAssignableFrom(type))
+        if (!typeof(IrNode).IsAssignableFrom(type))
             throw new ArgumentException("Type must be an IRNode", nameof(type));
         _handlers[type] = handler;
     }
 
-    public IIRNodeHandler? Get(IRNode node)
+    public IIrNodeHandler? Get(IrNode node)
     {
         var type = node.GetType();
-        return _handlers.TryGetValue(type, out var handler) ? handler : null;
+        return _handlers.GetValueOrDefault(type);
     }
 }

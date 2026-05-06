@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 
 namespace BadLang.IR.Handlers
 {
     public interface IExprBuildHandler
     {
         Type TargetType { get; }
-        IRValue Build(Expr expr, List<IRNode> ir, IIRBuilderContext context);
+        IrValue Build(Expr expr, List<IrNode> ir, IIRBuilderContext context);
     }
 }

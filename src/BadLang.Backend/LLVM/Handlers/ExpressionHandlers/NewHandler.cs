@@ -1,25 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
 using BadLang.Core;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class NewHandler : ExpressionHandler
+public class NewHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public NewHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.New;
 
     public override LLVMValueRef Compile(Expr expr)
     {
         var newExpr = (Expr.New)expr;
         var builder = Session.Infrastructure.Builder;
-        var ctx = Session.Infrastructure.Context;
         var module = Session.Infrastructure.Module;
         
         if (newExpr.Callee is Expr.Variable v)
@@ -48,7 +43,7 @@ public class NewHandler : ExpressionHandler
                         args[0] = objRaw;
                         for (int i = 0; i < newExpr.Arguments.Count; i++)
                             args[i + 1] = ExpressionCompiler.Compile(newExpr.Arguments[i]);
-                        builder.BuildCall2(ctorInfo.Type, ctorFunc, args, "");
+                        builder.BuildCall2(ctorInfo.Type, ctorFunc, args);
                     }
 
                     Session.LastExpressionType = typeName;

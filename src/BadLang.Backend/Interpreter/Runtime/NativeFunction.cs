@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace BadLang.Backend.Interpreter.Runtime;
 
 public class NativeFunction : IBadLangCallable

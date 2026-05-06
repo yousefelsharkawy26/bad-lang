@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using LLVMSharp.Interop;
 using BadLang.Backend.LLVM.Abstractions;
 
@@ -24,7 +22,7 @@ public class LlvmRuntimeProvider : IRuntimeProvider
         module.AddFunction("printf", PrintfType);
 
         // badlang_gc_alloc
-        var gcMallocType = LLVMTypeRef.CreateFunction(i8Ptr, new[] { i64 }, false);
+        var gcMallocType = LLVMTypeRef.CreateFunction(i8Ptr, [i64]);
         module.AddFunction("badlang_gc_alloc", gcMallocType);
         _runtimeTypes["gc_malloc"] = gcMallocType;
 
@@ -34,66 +32,66 @@ public class LlvmRuntimeProvider : IRuntimeProvider
         _runtimeTypes["gc_collect"] = gcCollectType;
 
         // badlang_gc_init
-        var gcInitType = LLVMTypeRef.CreateFunction(context.VoidType, new[] { i8Ptr });
+        var gcInitType = LLVMTypeRef.CreateFunction(context.VoidType, [i8Ptr]);
         module.AddFunction("badlang_gc_init", gcInitType);
         _runtimeTypes["badlang_gc_init"] = gcInitType;
 
         // badlang_str_new
-        var strNewType = LLVMTypeRef.CreateFunction(voidPtr, new[] { i8Ptr }, false);
+        var strNewType = LLVMTypeRef.CreateFunction(voidPtr, [i8Ptr]);
         module.AddFunction("badlang_str_new", strNewType);
         _runtimeTypes["badlang_str_new"] = strNewType;
 
         // badlang_str_concat
-        var strConcatType = LLVMTypeRef.CreateFunction(voidPtr, new[] { voidPtr, voidPtr }, false);
+        var strConcatType = LLVMTypeRef.CreateFunction(voidPtr, [voidPtr, voidPtr]);
         module.AddFunction("badlang_str_concat", strConcatType);
         _runtimeTypes["badlang_str_concat"] = strConcatType;
 
         // badlang_str_print
-        var strPrintType = LLVMTypeRef.CreateFunction(context.VoidType, new[] { voidPtr }, false);
+        var strPrintType = LLVMTypeRef.CreateFunction(context.VoidType, [voidPtr]);
         module.AddFunction("badlang_str_print", strPrintType);
         _runtimeTypes["badlang_str_print"] = strPrintType;
 
         // badlang_num_to_str
-        var numToStrType = LLVMTypeRef.CreateFunction(voidPtr, new[] { @double }, false);
+        var numToStrType = LLVMTypeRef.CreateFunction(voidPtr, [@double]);
         module.AddFunction("badlang_num_to_str", numToStrType);
         _runtimeTypes["badlang_num_to_str"] = numToStrType;
 
         // badlang_str_eq
-        var strEqType = LLVMTypeRef.CreateFunction(i1, new[] { voidPtr, voidPtr }, false);
+        var strEqType = LLVMTypeRef.CreateFunction(i1, [voidPtr, voidPtr]);
         module.AddFunction("badlang_str_eq", strEqType);
         _runtimeTypes["badlang_str_eq"] = strEqType;
 
         // badlang_str_length
-        var strLenType = LLVMTypeRef.CreateFunction(i64, new[] { voidPtr }, false);
+        var strLenType = LLVMTypeRef.CreateFunction(i64, [voidPtr]);
         module.AddFunction("badlang_str_length", strLenType);
         _runtimeTypes["badlang_str_length"] = strLenType;
 
         // badlang_str_at
-        var strAtType = LLVMTypeRef.CreateFunction(voidPtr, new[] { voidPtr, i64 }, false);
+        var strAtType = LLVMTypeRef.CreateFunction(voidPtr, [voidPtr, i64]);
         module.AddFunction("badlang_str_at", strAtType);
         _runtimeTypes["badlang_str_at"] = strAtType;
 
         // badlang_console_read_line
-        var consoleReadType = LLVMTypeRef.CreateFunction(voidPtr, new[] { voidPtr }, false);
+        var consoleReadType = LLVMTypeRef.CreateFunction(voidPtr, [voidPtr]);
         module.AddFunction("badlang_console_read_line", consoleReadType);
         _runtimeTypes["badlang_console_read_line"] = consoleReadType;
 
         // badlang_print_value
-        var printValueType = LLVMTypeRef.CreateFunction(context.VoidType, new[] { i64 }, false);
+        var printValueType = LLVMTypeRef.CreateFunction(context.VoidType, [i64]);
         module.AddFunction("badlang_print_value", printValueType);
         _runtimeTypes["badlang_print_value"] = printValueType;
 
         // badlang_closure_alloc
-        var closureAllocType = LLVMTypeRef.CreateFunction(voidPtr, new[] { voidPtr, i32 }, false);
+        var closureAllocType = LLVMTypeRef.CreateFunction(voidPtr, [voidPtr, i32]);
         module.AddFunction("badlang_closure_alloc", closureAllocType);
         _runtimeTypes["badlang_closure_alloc"] = closureAllocType;
 
         // Exception helpers
-        var exNewType = LLVMTypeRef.CreateFunction(voidPtr, new[] { voidPtr }, false);
+        var exNewType = LLVMTypeRef.CreateFunction(voidPtr, [voidPtr]);
         module.AddFunction("badlang_exception_new", exNewType);
         _runtimeTypes["badlang_exception_new"] = exNewType;
 
-        var exMsgType = LLVMTypeRef.CreateFunction(voidPtr, new[] { voidPtr }, false);
+        var exMsgType = LLVMTypeRef.CreateFunction(voidPtr, [voidPtr]);
         module.AddFunction("badlang_exception_message", exMsgType);
         _runtimeTypes["badlang_exception_message"] = exMsgType;
 
@@ -101,7 +99,7 @@ public class LlvmRuntimeProvider : IRuntimeProvider
         module.AddFunction("badlang_current_exception", currentExType);
         _runtimeTypes["badlang_current_exception"] = currentExType;
 
-        var throwType = LLVMTypeRef.CreateFunction(context.VoidType, new[] { voidPtr });
+        var throwType = LLVMTypeRef.CreateFunction(context.VoidType, [voidPtr]);
         module.AddFunction("badlang_throw", throwType);
         _runtimeTypes["badlang_throw"] = throwType;
 
@@ -119,19 +117,19 @@ public class LlvmRuntimeProvider : IRuntimeProvider
         module.AddFunction("badlang_list_new", listNewT);
         _runtimeTypes["badlang_list_new"] = listNewT;
 
-        var listPushT = LLVMTypeRef.CreateFunction(context.VoidType, new[] { listPtrT, i64 });
+        var listPushT = LLVMTypeRef.CreateFunction(context.VoidType, [listPtrT, i64]);
         module.AddFunction("badlang_list_push", listPushT);
         _runtimeTypes["badlang_list_push"] = listPushT;
 
-        var listGetT = LLVMTypeRef.CreateFunction(i64, new[] { listPtrT, i64 });
+        var listGetT = LLVMTypeRef.CreateFunction(i64, [listPtrT, i64]);
         module.AddFunction("badlang_list_get", listGetT);
         _runtimeTypes["badlang_list_get"] = listGetT;
 
-        var listSetT = LLVMTypeRef.CreateFunction(context.VoidType, new[] { listPtrT, i64, i64 });
+        var listSetT = LLVMTypeRef.CreateFunction(context.VoidType, [listPtrT, i64, i64]);
         module.AddFunction("badlang_list_set", listSetT);
         _runtimeTypes["badlang_list_set"] = listSetT;
 
-        var listLenT = LLVMTypeRef.CreateFunction(i64, new[] { listPtrT });
+        var listLenT = LLVMTypeRef.CreateFunction(i64, [listPtrT]);
         module.AddFunction("badlang_list_length", listLenT);
         _runtimeTypes["badlang_list_length"] = listLenT;
 
@@ -141,25 +139,25 @@ public class LlvmRuntimeProvider : IRuntimeProvider
         module.AddFunction("badlang_map_new", mapNewT);
         _runtimeTypes["badlang_map_new"] = mapNewT;
 
-        var mapSetT = LLVMTypeRef.CreateFunction(context.VoidType, new[] { mapPtrT, i64, i64 });
+        var mapSetT = LLVMTypeRef.CreateFunction(context.VoidType, [mapPtrT, i64, i64]);
         module.AddFunction("badlang_map_set", mapSetT);
         _runtimeTypes["badlang_map_set"] = mapSetT;
 
-        var mapGetT = LLVMTypeRef.CreateFunction(i64, new[] { mapPtrT, i64 });
+        var mapGetT = LLVMTypeRef.CreateFunction(i64, [mapPtrT, i64]);
         module.AddFunction("badlang_map_get", mapGetT);
         _runtimeTypes["badlang_map_get"] = mapGetT;
 
         // Math stdlib
-        var d2d = LLVMTypeRef.CreateFunction(@double, new[] { @double });
-        var d2d2 = LLVMTypeRef.CreateFunction(@double, new[] { @double, @double });
+        var d2D = LLVMTypeRef.CreateFunction(@double, [@double]);
+        var d2D2 = LLVMTypeRef.CreateFunction(@double, [@double, @double]);
         foreach (var name in new[] { "abs", "sqrt", "floor", "ceil", "round", "log", "log2", "sin", "cos", "tan" })
         {
             var fullName = $"badlang_math_{name}";
-            module.AddFunction(fullName, d2d);
-            _runtimeTypes[fullName] = d2d;
+            module.AddFunction(fullName, d2D);
+            _runtimeTypes[fullName] = d2D;
         }
-        module.AddFunction("badlang_math_pow", d2d2);
-        _runtimeTypes["badlang_math_pow"] = d2d2;
+        module.AddFunction("badlang_math_pow", d2D2);
+        _runtimeTypes["badlang_math_pow"] = d2D2;
     }
 
     public LLVMTypeRef GetRuntimeType(string name)

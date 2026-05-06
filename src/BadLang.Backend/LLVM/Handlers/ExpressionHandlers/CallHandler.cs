@@ -1,17 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class CallHandler : ExpressionHandler
+public class CallHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public CallHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.Call;
 
     public override LLVMValueRef Compile(Expr expr)
@@ -54,7 +50,7 @@ public class CallHandler : ExpressionHandler
         for (int i = 0; i < callExpr.Arguments.Count; i++)
             paramTypes[i + 1] = ctx.Int64Type;
 
-        var funcType = LLVMTypeRef.CreateFunction(retType, paramTypes, false);
+        var funcType = LLVMTypeRef.CreateFunction(retType, paramTypes);
         var funcFunc = builder.BuildBitCast(funcPtrRaw, LLVMTypeRef.CreatePointer(funcType, 0), "func_cast");
 
         var argsClosure = new LLVMValueRef[callExpr.Arguments.Count + 1];
@@ -62,7 +58,7 @@ public class CallHandler : ExpressionHandler
         for (int i = 0; i < callExpr.Arguments.Count; i++)
             argsClosure[i + 1] = ExpressionCompiler.Compile(callExpr.Arguments[i]);
 
-        Session.LastExpressionType = null; // We don't know the return type of a closure call statically easily here without more metadata
+        Session.LastExpressionType = null; // We don't know the return typeof a closure call statically easily here without more metadata
         return Session.ToI64(builder.BuildCall2(funcType, funcFunc, argsClosure, "closure_call"));
     }
 }

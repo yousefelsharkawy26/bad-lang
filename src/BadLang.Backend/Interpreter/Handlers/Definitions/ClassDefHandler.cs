@@ -1,19 +1,16 @@
-using System;
-using System.Collections.Generic;
 using BadLang.IR;
-using BadLang.Core;
 using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Definitions;
 
-public class ClassDefHandler : IIRNodeHandler
+public class ClassDefHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRClassDef) };
-    public bool CanHandle(IRNode node) => node is IRClassDef;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrClassDef)];
+    public bool CanHandle(IrNode node) => node is IrClassDef;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var cdef = (IRClassDef)node;
+        var cdef = (IrClassDef)node;
         var env = context.Environment;
 
         BadLangClass? superClass = null;

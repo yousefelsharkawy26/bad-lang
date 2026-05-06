@@ -1,18 +1,17 @@
 using BadLang.Core;
-using BadLang.Lexer;
+using BadLang.Parser.Ast;
 
 namespace BadLang.Parser;
 
-public class ParseError : Exception
+public class ParseError(Token token, string message) : Exception(message)
 {
-    public Token Token { get; }
-    public ParseError(Token token, string message) : base(message) => Token = token;
+    public Token Token { get; } = token;
 }
 
 public class Parser
 {
     private readonly List<Token> _tokens;
-    private int _current = 0;
+    private int _current;
 
     public Parser(List<Token> tokens)
     {
@@ -536,12 +535,12 @@ public class Parser
             return ParseInterpolatedString(Previous(), (string)Previous().Literal!);
 
         // Single-argument built-in keyword expressions: keyword(expr)
-        if (Match(TokenType.TypeOf))   return ParseSingleArgKeyword(kw => new Expr.TypeOf(kw, default!));
-        if (Match(TokenType.NameOf))   return ParseSingleArgKeyword(kw => new Expr.NameOf(kw, default!));
-        if (Match(TokenType.ToString)) return ParseSingleArgKeyword(kw => new Expr.ToStringExpr(kw, default!));
-        if (Match(TokenType.ToNumber)) return ParseSingleArgKeyword(kw => new Expr.ToNumberExpr(kw, default!));
-        if (Match(TokenType.IsNull))   return ParseSingleArgKeyword(kw => new Expr.IsNullExpr(kw, default!));
-        if (Match(TokenType.Panic))    return ParseSingleArgKeyword(kw => new Expr.PanicExpr(kw, default!));
+        if (Match(TokenType.TypeOf))   return ParseSingleArgKeyword(kw => new Expr.TypeOf(kw, null!));
+        if (Match(TokenType.NameOf))   return ParseSingleArgKeyword(kw => new Expr.NameOf(kw, null!));
+        if (Match(TokenType.ToString)) return ParseSingleArgKeyword(kw => new Expr.ToStringExpr(kw, null!));
+        if (Match(TokenType.ToNumber)) return ParseSingleArgKeyword(kw => new Expr.ToNumberExpr(kw, null!));
+        if (Match(TokenType.IsNull))   return ParseSingleArgKeyword(kw => new Expr.IsNullExpr(kw, null!));
+        if (Match(TokenType.Panic))    return ParseSingleArgKeyword(kw => new Expr.PanicExpr(kw, null!));
 
         if (Match(TokenType.Assert))   return AssertExpression();
 
@@ -557,13 +556,13 @@ public class Parser
 
     // ─── Primary helpers ──────────────────────────────────────────────────────
 
-    /// <summary>Parses a keyword built-in that takes a single parenthesised expression.</summary>
+    /// <summary>Parses a keyword built-in that takes a single parenthesized expression.</summary>
     private Expr ParseSingleArgKeyword(Func<Token, Expr> factory)
     {
         Token keyword = Previous();
         Consume(TokenType.OpenParen, $"Expect '(' after '{keyword.Lexeme}'.");
         Expr arg = Expression();
-        Consume(TokenType.CloseParen, $"Expect ')' after expression.");
+        Consume(TokenType.CloseParen, "Expect ')' after expression.");
         // Re-create using the real argument
         return keyword.Type switch
         {
@@ -661,13 +660,6 @@ public class Parser
         return new Expr.Grouping(expr);
     }
 
-    private Expr GroupingExpression()
-    {
-        Expr expr = Expression();
-        Consume(TokenType.CloseParen, "Expect ')' after expression.");
-        return new Expr.Grouping(expr);
-    }
-
     private Expr ArrayLiteralExpression()
     {
         var elements = new List<Expr>();
@@ -722,7 +714,7 @@ public class Parser
             if (i >= pattern.Length) throw Error(token, "Unterminated interpolation.");
 
             string exprText = pattern[start..i];
-            var subParser   = new Parser(new BadLang.Lexer.Lexer(exprText).ScanTokens());
+            var subParser   = new Parser(new Lexer.Lexer(exprText).ScanTokens());
             parts.Add(subParser.Expression());
 
             i++;

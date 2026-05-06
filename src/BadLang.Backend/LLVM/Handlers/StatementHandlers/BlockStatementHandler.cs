@@ -1,13 +1,15 @@
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 
 namespace BadLang.Backend.LLVM.Handlers.StatementHandlers;
 
-public class BlockStatementHandler : StatementHandler
+public class BlockStatementHandler(
+    CompilationSession session,
+    IStatementCompiler statementCompiler,
+    IExpressionCompiler expressionCompiler)
+    : StatementHandler(session, statementCompiler, expressionCompiler)
 {
-    public BlockStatementHandler(CompilationSession session, IStatementCompiler statementCompiler, IExpressionCompiler expressionCompiler) 
-        : base(session, statementCompiler, expressionCompiler) { }
-
     public override bool CanHandle(Stmt stmt) => stmt is Stmt.Block;
 
     public override void Compile(Stmt stmt)

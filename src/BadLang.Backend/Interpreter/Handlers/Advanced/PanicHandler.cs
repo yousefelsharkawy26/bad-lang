@@ -1,17 +1,15 @@
-using System;
 using BadLang.IR;
-using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Advanced;
 
-public class PanicHandler : IIRNodeHandler
+public class PanicHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRPanic) };
-    public bool CanHandle(IRNode node) => node is IRPanic;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrPanic)];
+    public bool CanHandle(IrNode node) => node is IrPanic;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var panic = (IRPanic)node;
+        var panic = (IrPanic)node;
         throw new Exception("panic: " + context.Eval(panic.Message));
     }
 }

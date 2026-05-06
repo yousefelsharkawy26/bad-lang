@@ -1,15 +1,13 @@
-using System;
 using BadLang.IR;
-using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.ControlFlow;
 
-public class LabelHandler : IIRNodeHandler
+public class LabelHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRLabel) };
-    public bool CanHandle(IRNode node) => node is IRLabel;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrLabel)];
+    public bool CanHandle(IrNode node) => node is IrLabel;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
         // Labels are handled during pre-pass, so they are no-ops during execution
         return HandlerResult.Continue;

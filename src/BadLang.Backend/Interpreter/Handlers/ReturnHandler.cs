@@ -4,14 +4,14 @@ using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers;
 
-public class ReturnHandler : IIRNodeHandler
+public class ReturnHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IRReturn) };
-    public bool CanHandle(IRNode node) => node is IRReturn;
+    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IrReturn) };
+    public bool CanHandle(IrNode node) => node is IrReturn;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var ret = (IRReturn)node;
+        var ret = (IrReturn)node;
         var value = ret.Value != null ? context.Eval(ret.Value) : null;
         throw new ReturnSignal(value);
     }

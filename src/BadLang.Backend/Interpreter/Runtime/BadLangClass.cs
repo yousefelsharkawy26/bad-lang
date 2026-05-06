@@ -1,49 +1,40 @@
-using System.Collections.Generic;
-using System.Linq;
-
 namespace BadLang.Backend.Interpreter.Runtime;
 
-public class BadLangClass : IBadLangCallable
+public class BadLangClass(
+    string name,
+    BadLangClass? superClass,
+    Dictionary<string, BadLangFunction> methods,
+    IReadOnlyList<string> fields)
+    : IBadLangCallable
 {
-    public string Name { get; }
-    public BadLangClass? SuperClass { get; }
-    private readonly Dictionary<string, BadLangFunction> _methods;
-    private readonly IReadOnlyList<string> _fields;
-
-    public BadLangClass(string name, BadLangClass? superClass, Dictionary<string, BadLangFunction> methods, IReadOnlyList<string> fields)
-    {
-        Name = name;
-        SuperClass = superClass;
-        _methods = methods;
-        _fields = fields;
-    }
+    public string Name { get; } = name;
 
     public List<string> GetAllFields()
     {
-        var fields = new List<string>(_fields);
-        if (SuperClass != null)
+        var fields1 = new List<string>(fields);
+        if (superClass != null)
         {
-            fields.AddRange(SuperClass.GetAllFields());
+            fields1.AddRange(superClass.GetAllFields());
         }
-        return fields.Distinct().ToList();
+        return fields1.Distinct().ToList();
     }
 
     public BadLangFunction? FindMethod(string name)
     {
-        if (_methods.TryGetValue(name, out var method))
+        if (methods.TryGetValue(name, out var method))
         {
             return method;
         }
 
-        if (SuperClass != null)
+        if (superClass != null)
         {
-            return SuperClass.FindMethod(name);
+            return superClass.FindMethod(name);
         }
 
         return null;
     }
 
-    public object? Call(Interpreter interpreter, List<object?> arguments)
+    public object Call(Interpreter interpreter, List<object?> arguments)
     {
         BadLangInstance instance = new(this);
         BadLangFunction? initializer = FindMethod("init") ?? FindMethod("__init");

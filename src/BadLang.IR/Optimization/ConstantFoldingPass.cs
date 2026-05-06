@@ -16,19 +16,19 @@ public class ConstantFoldingPass : IOptimizationPass
 {
     public string Name => "ConstantFolding";
 
-    public IReadOnlyList<IRNode> Apply(IReadOnlyList<IRNode> nodes)
+    public IReadOnlyList<IrNode> Apply(IReadOnlyList<IrNode> nodes)
     {
-        var result = new List<IRNode>(nodes.Count);
+        var result = new List<IrNode>(nodes.Count);
 
         foreach (var node in nodes)
         {
             switch (node)
             {
-                case IRBinary bin when bin.Left is IRConst leftConst && bin.Right is IRConst rightConst:
+                case IrBinary bin when bin.Left is IrConst leftConst && bin.Right is IrConst rightConst:
                     var folded = TryFold(bin.Op, leftConst.Value, rightConst.Value);
                     if (folded != null)
                     {
-                        result.Add(new IRAssign { Target = bin.Target, Value = new IRConst(folded) });
+                        result.Add(new IrAssign { Target = bin.Target, Value = new IrConst(folded) });
                     }
                     else
                     {
@@ -36,11 +36,11 @@ public class ConstantFoldingPass : IOptimizationPass
                     }
                     break;
 
-                case IRUnary un when un.Operand is IRConst operandConst:
+                case IrUnary un when un.Operand is IrConst operandConst:
                     var foldedUnary = TryFoldUnary(un.Op, operandConst.Value);
                     if (foldedUnary != null)
                     {
-                        result.Add(new IRAssign { Target = un.Target, Value = new IRConst(foldedUnary) });
+                        result.Add(new IrAssign { Target = un.Target, Value = new IrConst(foldedUnary) });
                     }
                     else
                     {
@@ -49,8 +49,8 @@ public class ConstantFoldingPass : IOptimizationPass
                     break;
 
                 // Recurse into function/class/lambda bodies
-                case IRFunctionDef funcDef:
-                    result.Add(new IRFunctionDef
+                case IrFunctionDef funcDef:
+                    result.Add(new IrFunctionDef
                     {
                         Name = funcDef.Name,
                         Parameters = funcDef.Parameters,
@@ -58,18 +58,18 @@ public class ConstantFoldingPass : IOptimizationPass
                     });
                     break;
 
-                case IRClassDef classDef:
-                    var optimizedMethods = new List<IRFunctionDef>();
+                case IrClassDef classDef:
+                    var optimizedMethods = new List<IrFunctionDef>();
                     foreach (var method in classDef.Methods)
                     {
-                        optimizedMethods.Add(new IRFunctionDef
+                        optimizedMethods.Add(new IrFunctionDef
                         {
                             Name = method.Name,
                             Parameters = method.Parameters,
                             Body = Apply(method.Body)
                         });
                     }
-                    result.Add(new IRClassDef
+                    result.Add(new IrClassDef
                     {
                         Name = classDef.Name,
                         SuperClass = classDef.SuperClass,
@@ -78,8 +78,8 @@ public class ConstantFoldingPass : IOptimizationPass
                     });
                     break;
 
-                case IRLambda lambda:
-                    result.Add(new IRLambda
+                case IrLambda lambda:
+                    result.Add(new IrLambda
                     {
                         Target = lambda.Target,
                         Parameters = lambda.Parameters,

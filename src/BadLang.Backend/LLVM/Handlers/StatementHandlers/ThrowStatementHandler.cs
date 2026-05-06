@@ -1,15 +1,16 @@
-using System;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.StatementHandlers;
 
-public class ThrowStatementHandler : StatementHandler
+public class ThrowStatementHandler(
+    CompilationSession session,
+    IStatementCompiler statementCompiler,
+    IExpressionCompiler expressionCompiler)
+    : StatementHandler(session, statementCompiler, expressionCompiler)
 {
-    public ThrowStatementHandler(CompilationSession session, IStatementCompiler statementCompiler, IExpressionCompiler expressionCompiler) 
-        : base(session, statementCompiler, expressionCompiler) { }
-
     public override bool CanHandle(Stmt stmt) => stmt is Stmt.Throw;
 
     public override void Compile(Stmt stmt)
@@ -37,7 +38,7 @@ public class ThrowStatementHandler : StatementHandler
                 new[] { emptyStrObj }, "ex_obj");
         }
         
-        builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_throw"), throwFn, new[] { exObj }, "");
+        builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_throw"), throwFn, [exObj]);
         builder.BuildUnreachable();
         
         var curFunc = builder.InsertBlock.Parent;

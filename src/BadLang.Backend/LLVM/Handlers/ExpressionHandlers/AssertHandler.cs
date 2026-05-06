@@ -1,14 +1,13 @@
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class AssertHandler : ExpressionHandler
+public class AssertHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public AssertHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.AssertExpr;
 
     public override LLVMValueRef Compile(Expr expr)
@@ -46,13 +45,13 @@ public class AssertHandler : ExpressionHandler
         }
         // Call badlang_panic(cstr)
         var panicFn = module.GetNamedFunction("badlang_panic");
-        builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_panic"), panicFn, new[] { msgStr }, "");
+        builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_panic"), panicFn, [msgStr]);
         builder.BuildUnreachable();
 
         // Continue in pass block
         builder.PositionAtEnd(passBlock);
 
         Session.LastExpressionType = "void";
-        return LLVMValueRef.CreateConstInt(ctx.Int64Type, 0, false);
+        return LLVMValueRef.CreateConstInt(ctx.Int64Type, 0);
     }
 }

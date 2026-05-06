@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using BadLang.Lexer;
-using BadLang.Parser;
 using BadLang.Semantic;
 using BadLang.Cli.Diagnostics;
 using Spectre.Console;
@@ -44,7 +40,6 @@ namespace BadLang.Cli.Commands
                         if (err.Token != null) ErrorRenderer.Render(source, err.Token, err.Message);
                         else AnsiConsole.MarkupLine($"[red]Type Error:[/] {err.Message}");
                     }
-                    return;
                 }
             }
             catch (Exception ex)

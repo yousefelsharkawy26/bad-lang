@@ -1,17 +1,15 @@
-using System.Collections.Generic;
 using BadLang.IR;
-using BadLang.Backend.Interpreter.Runtime;
 
 namespace BadLang.Backend.Interpreter.Handlers.Advanced;
 
-public class EnumDefHandler : IIRNodeHandler
+public class EnumDefHandler : IIrNodeHandler
 {
-    public System.Collections.Generic.IEnumerable<System.Type> GetHandledTypes() => new[] { typeof(IREnumDef) };
-    public bool CanHandle(IRNode node) => node is IREnumDef;
+    public IEnumerable<Type> GetHandledTypes() => [typeof(IrEnumDef)];
+    public bool CanHandle(IrNode node) => node is IrEnumDef;
 
-    public HandlerResult Handle(IRNode node, ExecutionContext context)
+    public HandlerResult Handle(IrNode node, ExecutionContext context)
     {
-        var edef = (IREnumDef)node;
+        var edef = (IrEnumDef)node;
         var enumValues = new Dictionary<object, object?>();
         for (int i = 0; i < edef.Variants.Count; i++)
         {

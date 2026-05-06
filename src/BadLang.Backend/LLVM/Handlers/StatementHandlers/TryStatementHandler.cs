@@ -1,16 +1,16 @@
-using System;
-using System.Collections.Generic;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.StatementHandlers;
 
-public class TryStatementHandler : StatementHandler
+public class TryStatementHandler(
+    CompilationSession session,
+    IStatementCompiler statementCompiler,
+    IExpressionCompiler expressionCompiler)
+    : StatementHandler(session, statementCompiler, expressionCompiler)
 {
-    public TryStatementHandler(CompilationSession session, IStatementCompiler statementCompiler, IExpressionCompiler expressionCompiler) 
-        : base(session, statementCompiler, expressionCompiler) { }
-
     public override bool CanHandle(Stmt stmt) => stmt is Stmt.TryCatch;
 
     public override void Compile(Stmt stmt)
@@ -21,7 +21,6 @@ public class TryStatementHandler : StatementHandler
         var module = Session.Infrastructure.Module;
 
         var curFunc = builder.InsertBlock.Parent;
-        var hasFinally = tryCatchStmt.FinallyBlock != null;
 
         var catchBb = curFunc.AppendBasicBlock("try_catch");
         var finallyBb = curFunc.AppendBasicBlock("try_finally");
@@ -34,7 +33,7 @@ public class TryStatementHandler : StatementHandler
         builder.BuildStore(LLVMValueRef.CreateConstInt(ctx.Int1Type, 0), rethrowFlag);
         builder.BuildStore(LLVMValueRef.CreateConstNull(Session.VoidPtrType), pendingEx);
 
-        var setjmpType = LLVMTypeRef.CreateFunction(ctx.Int32Type, new[] { LLVMTypeRef.CreatePointer(ctx.Int32Type, 0) }, false);
+        var setjmpType = LLVMTypeRef.CreateFunction(ctx.Int32Type, [LLVMTypeRef.CreatePointer(ctx.Int32Type, 0)]);
         var setjmpFn = module.GetNamedFunction("_setjmp");
         if (setjmpFn.Handle == IntPtr.Zero) setjmpFn = module.AddFunction("_setjmp", setjmpType);
 
@@ -64,8 +63,8 @@ public class TryStatementHandler : StatementHandler
         
         if (builder.InsertBlock.Terminator.Handle == IntPtr.Zero)
         {
-            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_try_end"), tryEnd, Array.Empty<LLVMValueRef>(), ""); 
-            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_try_end"), tryEnd, Array.Empty<LLVMValueRef>(), ""); 
+            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_try_end"), tryEnd, Array.Empty<LLVMValueRef>()); 
+            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_try_end"), tryEnd, Array.Empty<LLVMValueRef>()); 
             builder.BuildBr(finallyBb);
         }
 
@@ -91,7 +90,7 @@ public class TryStatementHandler : StatementHandler
         
         if (builder.InsertBlock.Terminator.Handle == IntPtr.Zero)
         {
-            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_try_end"), tryEnd, Array.Empty<LLVMValueRef>(), ""); 
+            builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_try_end"), tryEnd, Array.Empty<LLVMValueRef>()); 
             builder.BuildBr(finallyBb);
         }
 
@@ -118,7 +117,8 @@ public class TryStatementHandler : StatementHandler
         
         Session.Infrastructure.Builder.PositionAtEnd(rethrowBb);
         var throwFn = module.GetNamedFunction("badlang_throw");
-        builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_throw"), throwFn, new[] { builder.BuildLoad2(Session.VoidPtrType, pendingEx, "ex_to_rethrow") }, "");
+        builder.BuildCall2(Session.Runtime.GetRuntimeType("badlang_throw"), throwFn, [builder.BuildLoad2(Session.VoidPtrType, pendingEx, "ex_to_rethrow")
+        ]);
         builder.BuildUnreachable();
 
         builder.PositionAtEnd(finalAfterBb);

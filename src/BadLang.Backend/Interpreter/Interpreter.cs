@@ -45,9 +45,9 @@ public class Interpreter
         _engine = new ExecutionEngine(new HandlerRegistry(GetDefaultHandlers()));
     }
 
-    private IEnumerable<IIRNodeHandler> GetDefaultHandlers()
+    private IEnumerable<IIrNodeHandler> GetDefaultHandlers()
     {
-        return new List<IIRNodeHandler>
+        return new List<IIrNodeHandler>
         {
             new BinaryHandler(),
             new JumpHandler(),
@@ -94,14 +94,14 @@ public class Interpreter
         _moduleLoader = new ModuleLoader(path);
     }
 
-    internal object? GetValueInternal(IRValue value, Environment env)
+    internal object? GetValueInternal(IrValue value, Environment env)
     {
-        if (value is IRConst c) return c.Value;
-        if (value is IRVar v) return env.Get(v.Name);
+        if (value is IrConst c) return c.Value;
+        if (value is IrVar v) return env.Get(v.Name);
         return null;
     }
 
-    public void Interpret(IReadOnlyList<IRNode> irNodes)
+    public void Interpret(IReadOnlyList<IrNode> irNodes)
     {
         try
         {
@@ -128,12 +128,12 @@ public class Interpreter
         }
     }
 
-    public object? ExecuteIR(IReadOnlyList<IRNode> irNodes, Environment env)
+    public object? ExecuteIR(IReadOnlyList<IrNode> irNodes, Environment env)
     {
         var labels = new Dictionary<string, int>();
         for (int i = 0; i < irNodes.Count; i++)
         {
-            if (irNodes[i] is IRLabel lbl)
+            if (irNodes[i] is IrLabel lbl)
             {
                 labels[lbl.Name] = i;
             }
@@ -151,7 +151,7 @@ public class Interpreter
         finally { _callDepth--; }
     }
 
-    internal void HandleImport(IRImport importNode, Environment env)
+    internal void HandleImport(IrImport importNode, Environment env)
     {
         if (!_moduleCache.TryGetValue(importNode.Path, out var moduleDict))
         {
@@ -211,7 +211,7 @@ public class Interpreter
         }
     }
     
-    internal void HandleExport(IRExport exportNode)
+    internal void HandleExport(IrExport exportNode)
     {
         if (!_exports.Contains(exportNode.Name))
         {

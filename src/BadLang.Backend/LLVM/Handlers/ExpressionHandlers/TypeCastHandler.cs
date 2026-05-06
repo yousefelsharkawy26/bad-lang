@@ -1,15 +1,13 @@
-using System;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class TypeCastHandler : ExpressionHandler
+public class TypeCastHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public TypeCastHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
     public override bool CanHandle(Expr expr) => expr is Expr.TypeCast;
 
     public override LLVMValueRef Compile(Expr expr)
@@ -17,7 +15,7 @@ public class TypeCastHandler : ExpressionHandler
         var castExpr = (Expr.TypeCast)expr;
         var val = ExpressionCompiler.Compile(castExpr.Expr);
         
-        // In this simple LLVM backend, we mostly handle casts at runtime or they are i64 already.
+        // In this simple LLVM backend, we mostly handle casts at runtime or, they are i64 already.
         // For now, we'll just pass it through and update the type metadata.
         // A more advanced implementation would verify the cast or perform conversions.
         

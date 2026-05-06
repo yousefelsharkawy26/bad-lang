@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using BadLang.Backend.LLVM.Abstractions;
 using LLVMSharp.Interop;
 
@@ -16,7 +14,7 @@ public class LlvmSymbolTable : ISymbolTable
     public HashSet<string> LoadedModules { get; } = new();
 
     private readonly Dictionary<string, int> _globalMethodIndices = new();
-    private int _nextMethodIndex = 0;
+    private int _nextMethodIndex;
 
     public LlvmSymbolTable()
     {

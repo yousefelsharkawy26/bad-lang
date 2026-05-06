@@ -1,26 +1,16 @@
-using System;
-using System.Collections.Generic;
-using BadLang.Backend.Interpreter.Handlers;
 using BadLang.Backend.Interpreter.Runtime;
 using BadLang.IR;
 
 namespace BadLang.Backend.Interpreter;
 
-public class ExecutionEngine
+public class ExecutionEngine(HandlerRegistry registry)
 {
-    private readonly HandlerRegistry _registry;
-
-    public ExecutionEngine(HandlerRegistry registry)
-    {
-        _registry = registry;
-    }
-
-    public object? Execute(IReadOnlyList<IRNode> nodes, ExecutionContext context)
+    public object? Execute(IReadOnlyList<IrNode> nodes, ExecutionContext context)
     {
         while (context.InstructionPointer < nodes.Count)
         {
             var node = nodes[context.InstructionPointer];
-            var handler = _registry.Get(node);
+            var handler = registry.Get(node);
 
             if (handler == null)
             {
@@ -30,7 +20,7 @@ public class ExecutionEngine
             try
             {
                 var result = handler.Handle(node, context);
-                if (result.AdvanceIP)
+                if (result.AdvanceIp)
                 {
                     context.InstructionPointer++;
                 }

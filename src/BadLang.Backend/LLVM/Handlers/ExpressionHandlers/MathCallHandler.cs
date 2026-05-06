@@ -1,25 +1,19 @@
 using BadLang.Backend.LLVM.Core;
-using BadLang.Backend.LLVM.Infrastructure;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
-using System;
-using System.Collections.Generic;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class MathCallHandler : ExpressionHandler
+public class MathCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    private static readonly HashSet<string> MathFunctions = new()
-    {
-        "pow", "sqrt", "sin", "cos", "tan", "log", "exp", "floor", "ceil", "round", "abs"
-    };
-
-    public MathCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
+    private static readonly HashSet<string> MathFunctions =
+        ["pow", "sqrt", "sin", "cos", "tan", "log", "exp", "floor", "ceil", "round", "abs"];
 
     public override bool CanHandle(Expr expr) 
     {
-        return expr is Expr.Call call && call.Callee is Expr.Variable v && MathFunctions.Contains(v.Name.Lexeme);
+        return expr is Expr.Call { Callee: Expr.Variable v } && MathFunctions.Contains(v.Name.Lexeme);
     }
 
     public override LLVMValueRef Compile(Expr expr)
@@ -39,7 +33,7 @@ public class MathCallHandler : ExpressionHandler
             var exp = Session.ToDouble(ExpressionCompiler.Compile(callExpr.Arguments[1]));
 
             var powFunc = module.GetNamedFunction("pow");
-            var powType = LLVMTypeRef.CreateFunction(ctx.DoubleType, new[] { ctx.DoubleType, ctx.DoubleType });
+            var powType = LLVMTypeRef.CreateFunction(ctx.DoubleType, [ctx.DoubleType, ctx.DoubleType]);
             if (powFunc.Handle == IntPtr.Zero) powFunc = module.AddFunction("pow", powType);
 
             Session.LastExpressionType = "number";
@@ -49,7 +43,7 @@ public class MathCallHandler : ExpressionHandler
         {
             var val = Session.ToDouble(ExpressionCompiler.Compile(callExpr.Arguments[0]));
             var func = module.GetNamedFunction(name);
-            var type = LLVMTypeRef.CreateFunction(ctx.DoubleType, new[] { ctx.DoubleType });
+            var type = LLVMTypeRef.CreateFunction(ctx.DoubleType, [ctx.DoubleType]);
             if (func.Handle == IntPtr.Zero) func = module.AddFunction(name, type);
 
             Session.LastExpressionType = "number";

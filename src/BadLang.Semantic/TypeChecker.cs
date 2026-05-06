@@ -4,6 +4,7 @@ using System.Linq;
 
 using BadLang.Core;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 
 namespace BadLang.Semantic;
 

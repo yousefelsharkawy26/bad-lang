@@ -11,25 +11,25 @@ namespace BadLang.IR.Optimization
     {
         public string Name => "Constant Propagation";
 
-        public IReadOnlyList<IRNode> Apply(IReadOnlyList<IRNode> nodes)
+        public IReadOnlyList<IrNode> Apply(IReadOnlyList<IrNode> nodes)
         {
-            var result = new List<IRNode>();
-            var knownConstants = new Dictionary<string, IRConst>();
+            var result = new List<IrNode>();
+            var knownConstants = new Dictionary<string, IrConst>();
 
             foreach (var node in nodes)
             {
                 // Invalidate all tracked state on jump targets (labels) to be safe across branches
-                if (node is IRLabel || node is IRTry || node is IREnterScope || node is IRExitScope)
+                if (node is IrLabel || node is IrTry || node is IrEnterScope || node is IrExitScope)
                 {
                     knownConstants.Clear();
                 }
 
-                if (node is IRAssign assign)
+                if (node is IrAssign assign)
                 {
                     // Evaluate new value with known constants
                     var newValue = ResolveValue(assign.Value, knownConstants);
                     
-                    if (newValue is IRConst c)
+                    if (newValue is IrConst c)
                     {
                         knownConstants[assign.Target] = c;
                     }
@@ -40,7 +40,7 @@ namespace BadLang.IR.Optimization
                     
                     result.Add(assign with { Value = newValue });
                 }
-                else if (node is IRBinary bin)
+                else if (node is IrBinary bin)
                 {
                     knownConstants.Remove(bin.Target);
                     result.Add(bin with { 
@@ -48,46 +48,46 @@ namespace BadLang.IR.Optimization
                         Right = ResolveValue(bin.Right, knownConstants) 
                     });
                 }
-                else if (node is IRUnary un)
+                else if (node is IrUnary un)
                 {
                     knownConstants.Remove(un.Target);
                     result.Add(un with { Operand = ResolveValue(un.Operand, knownConstants) });
                 }
-                else if (node is IRCondJump cj)
+                else if (node is IrCondJump cj)
                 {
                     result.Add(cj with { Condition = ResolveValue(cj.Condition, knownConstants) });
                 }
-                else if (node is IRReturn ret && ret.Value != null)
+                else if (node is IrReturn ret && ret.Value != null)
                 {
                     result.Add(ret with { Value = ResolveValue(ret.Value, knownConstants) });
                 }
-                else if (node is IRThrow thr)
+                else if (node is IrThrow thr)
                 {
                     result.Add(thr with { Exception = ResolveValue(thr.Exception, knownConstants) });
                 }
-                else if (node is IRCall call)
+                else if (node is IrCall call)
                 {
                     knownConstants.Remove(call.Target);
-                    var newArgs = new List<IRValue>(call.Arguments.Count);
+                    var newArgs = new List<IrValue>(call.Arguments.Count);
                     foreach (var arg in call.Arguments) newArgs.Add(ResolveValue(arg, knownConstants));
                     result.Add(call with { Arguments = newArgs });
                 }
-                else if (node is IRMethodCall mcall)
+                else if (node is IrMethodCall mcall)
                 {
                     knownConstants.Remove(mcall.Target);
-                    var newArgs = new List<IRValue>(mcall.Arguments.Count);
+                    var newArgs = new List<IrValue>(mcall.Arguments.Count);
                     foreach (var arg in mcall.Arguments) newArgs.Add(ResolveValue(arg, knownConstants));
                     result.Add(mcall with { 
                         Object = ResolveValue(mcall.Object, knownConstants),
                         Arguments = newArgs 
                     });
                 }
-                else if (node is IRLoad load)
+                else if (node is IrLoad load)
                 {
                     knownConstants.Remove(load.Target);
                     result.Add(load); // Load variable by name, doesn't directly use an IRValue we can replace
                 }
-                else if (node is IRStore store)
+                else if (node is IrStore store)
                 {
                     // store modifies a variable
                     // If it modifies a variable that happens to match our tracking name, we should invalidate
@@ -96,24 +96,24 @@ namespace BadLang.IR.Optimization
                     knownConstants.Remove(store.VariableName);
                     result.Add(store with { Value = ResolveValue(store.Value, knownConstants) });
                 }
-                else if (node is IRDefine def)
+                else if (node is IrDefine def)
                 {
                     knownConstants.Remove(def.VariableName);
                     result.Add(def with { Value = ResolveValue(def.Value, knownConstants) });
                 }
-                else if (node is IRPropertyGet pget)
+                else if (node is IrPropertyGet pget)
                 {
                     knownConstants.Remove(pget.Target);
                     result.Add(pget with { Object = ResolveValue(pget.Object, knownConstants) });
                 }
-                else if (node is IRPropertySet pset)
+                else if (node is IrPropertySet pset)
                 {
                     result.Add(pset with { 
                         Object = ResolveValue(pset.Object, knownConstants),
                         Value = ResolveValue(pset.Value, knownConstants) 
                     });
                 }
-                else if (node is IRIndexGet iget)
+                else if (node is IrIndexGet iget)
                 {
                     knownConstants.Remove(iget.Target);
                     result.Add(iget with { 
@@ -121,7 +121,7 @@ namespace BadLang.IR.Optimization
                         Index = ResolveValue(iget.Index, knownConstants)
                     });
                 }
-                else if (node is IRIndexSet iset)
+                else if (node is IrIndexSet iset)
                 {
                     result.Add(iset with { 
                         ArrayOrMap = ResolveValue(iset.ArrayOrMap, knownConstants),
@@ -129,55 +129,55 @@ namespace BadLang.IR.Optimization
                         Value = ResolveValue(iset.Value, knownConstants)
                     });
                 }
-                else if (node is IRNewArray narr)
+                else if (node is IrNewArray narr)
                 {
                     knownConstants.Remove(narr.Target);
-                    var newElems = new List<IRValue>(narr.Elements.Count);
+                    var newElems = new List<IrValue>(narr.Elements.Count);
                     foreach (var el in narr.Elements) newElems.Add(ResolveValue(el, knownConstants));
                     result.Add(narr with { Elements = newElems });
                 }
-                else if (node is IRNewMap nmap)
+                else if (node is IrNewMap nmap)
                 {
                     knownConstants.Remove(nmap.Target);
                     result.Add(nmap);
                 }
-                else if (node is IRNew newObj)
+                else if (node is IrNew newObj)
                 {
                     knownConstants.Remove(newObj.Target);
-                    var newArgs = new List<IRValue>(newObj.Arguments.Count);
+                    var newArgs = new List<IrValue>(newObj.Arguments.Count);
                     foreach (var arg in newObj.Arguments) newArgs.Add(ResolveValue(arg, knownConstants));
                     result.Add(newObj with { 
                         Class = ResolveValue(newObj.Class, knownConstants),
                         Arguments = newArgs 
                     });
                 }
-                else if (node is IRLambda lam)
+                else if (node is IrLambda lam)
                 {
                     knownConstants.Remove(lam.Target);
                     // Pass bodies are not optimized by this simple linear pass unless recursed into.
                     // For now, we leave the body intact.
                     result.Add(lam);
                 }
-                else if (node is IRSuperPropertyGet spg)
+                else if (node is IrSuperPropertyGet spg)
                 {
                     knownConstants.Remove(spg.Target);
                     result.Add(spg);
                 }
-                else if (node is IRSuperMethodCall smc)
+                else if (node is IrSuperMethodCall smc)
                 {
                     knownConstants.Remove(smc.Target);
-                    var newArgs = new List<IRValue>(smc.Arguments.Count);
+                    var newArgs = new List<IrValue>(smc.Arguments.Count);
                     foreach (var arg in smc.Arguments) newArgs.Add(ResolveValue(arg, knownConstants));
                     result.Add(smc with { Arguments = newArgs });
                 }
-                else if (node is IRAssert ast)
+                else if (node is IrAssert ast)
                 {
                     result.Add(ast with { 
                         Condition = ResolveValue(ast.Condition, knownConstants),
                         Message = ResolveValue(ast.Message, knownConstants)
                     });
                 }
-                else if (node is IRPanic pan)
+                else if (node is IrPanic pan)
                 {
                     result.Add(pan with { Message = ResolveValue(pan.Message, knownConstants) });
                 }
@@ -193,9 +193,9 @@ namespace BadLang.IR.Optimization
             return result;
         }
 
-        private IRValue ResolveValue(IRValue value, Dictionary<string, IRConst> knownConstants)
+        private IrValue ResolveValue(IrValue value, Dictionary<string, IrConst> knownConstants)
         {
-            if (value is IRVar v && knownConstants.TryGetValue(v.Name, out var constant))
+            if (value is IrVar v && knownConstants.TryGetValue(v.Name, out var constant))
             {
                 return constant;
             }

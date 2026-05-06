@@ -1,12 +1,11 @@
-using System;
-using BadLang.Backend.Interpreter.Handlers;
 using BadLang.IR;
+using BadLang.Backend.Interpreter.Handlers;
 
 namespace BadLang.Backend.Interpreter;
 
-public interface IIRNodeHandler
+public interface IIrNodeHandler
 {
     IEnumerable<Type> GetHandledTypes();
-    bool CanHandle(IRNode node);
-    HandlerResult Handle(IRNode node, ExecutionContext context);
+    bool CanHandle(IrNode node);
+    HandlerResult Handle(IrNode node, ExecutionContext context);
 }

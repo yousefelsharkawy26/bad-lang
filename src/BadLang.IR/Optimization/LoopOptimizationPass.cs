@@ -12,9 +12,9 @@ namespace BadLang.IR.Optimization
     {
         public string Name => "Loop Optimization";
 
-        public IReadOnlyList<IRNode> Apply(IReadOnlyList<IRNode> nodes)
+        public IReadOnlyList<IrNode> Apply(IReadOnlyList<IrNode> nodes)
         {
-            var result = new List<IRNode>(nodes);
+            var result = new List<IrNode>(nodes);
             bool changed = true;
 
             // Run until no more code can be hoisted
@@ -26,7 +26,7 @@ namespace BadLang.IR.Optimization
                 var labels = new Dictionary<string, int>();
                 for (int i = 0; i < result.Count; i++)
                 {
-                    if (result[i] is IRLabel label)
+                    if (result[i] is IrLabel label)
                     {
                         labels[label.Name] = i;
                     }
@@ -36,11 +36,11 @@ namespace BadLang.IR.Optimization
                 for (int i = 0; i < result.Count; i++)
                 {
                     string? targetLabel = null;
-                    if (result[i] is IRJump jump)
+                    if (result[i] is IrJump jump)
                     {
                         targetLabel = jump.TargetLabel;
                     }
-                    else if (result[i] is IRCondJump cjump)
+                    else if (result[i] is IrCondJump cjump)
                     {
                         targetLabel = cjump.TrueLabel; // Only check true label for backward jumps typically
                         if (!labels.ContainsKey(targetLabel) || labels[targetLabel] > i)
@@ -64,7 +64,7 @@ namespace BadLang.IR.Optimization
             return result;
         }
 
-        private bool TryHoistInvariant(List<IRNode> nodes, int startIndex, int endIndex)
+        private bool TryHoistInvariant(List<IrNode> nodes, int startIndex, int endIndex)
         {
             // Find an invariant assignment: IRAssign with IRConst
             // Ensure the target is only assigned ONCE in the loop.
@@ -85,7 +85,7 @@ namespace BadLang.IR.Optimization
             // Now find the first hoistable node
             for (int i = startIndex; i <= endIndex; i++)
             {
-                if (nodes[i] is IRAssign assign && assign.Value is IRConst && assignmentCounts.TryGetValue(assign.Target, out int count) && count == 1)
+                if (nodes[i] is IrAssign assign && assign.Value is IrConst && assignmentCounts.TryGetValue(assign.Target, out int count) && count == 1)
                 {
                     // Hoist it!
                     var nodeToHoist = nodes[i];
@@ -98,26 +98,26 @@ namespace BadLang.IR.Optimization
             return false;
         }
 
-        private string? GetTarget(IRNode node)
+        private string? GetTarget(IrNode node)
         {
             return node switch
             {
-                IRAssign a => a.Target,
-                IRBinary b => b.Target,
-                IRUnary u => u.Target,
-                IRCall c => c.Target,
-                IRMethodCall mc => mc.Target,
-                IRLoad l => l.Target,
-                IRStore s => s.VariableName, // Treat stores to named variables as modifications
-                IRDefine d => d.VariableName,
-                IRPropertyGet pget => pget.Target,
-                IRIndexGet iget => iget.Target,
-                IRNewArray narr => narr.Target,
-                IRNewMap nmap => nmap.Target,
-                IRNew n => n.Target,
-                IRLambda lam => lam.Target,
-                IRSuperPropertyGet spg => spg.Target,
-                IRSuperMethodCall smc => smc.Target,
+                IrAssign a => a.Target,
+                IrBinary b => b.Target,
+                IrUnary u => u.Target,
+                IrCall c => c.Target,
+                IrMethodCall mc => mc.Target,
+                IrLoad l => l.Target,
+                IrStore s => s.VariableName, // Treat stores to named variables as modifications
+                IrDefine d => d.VariableName,
+                IrPropertyGet pget => pget.Target,
+                IrIndexGet iget => iget.Target,
+                IrNewArray narr => narr.Target,
+                IrNewMap nmap => nmap.Target,
+                IrNew n => n.Target,
+                IrLambda lam => lam.Target,
+                IrSuperPropertyGet spg => spg.Target,
+                IrSuperMethodCall smc => smc.Target,
                 _ => null
             };
         }

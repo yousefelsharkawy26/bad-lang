@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using BadLang.Lexer;
-using BadLang.Parser;
 using BadLang.Semantic;
 using BadLang.Backend.LLVM;
 using BadLang.Cli.Diagnostics;
@@ -23,12 +19,12 @@ namespace BadLang.Cli.Commands
             string source = File.ReadAllText(path);
             bool success = true;
 
-            void ReportError(string message, BadLang.Core.Token? token = null)
+            void ReportError(string message, Core.Token? token = null)
             {
                 success = false;
                 if (lspMode)
                 {
-                    var diag = new { type = "error", message = message, line = token?.Line ?? 0, lexeme = token?.Lexeme ?? "" };
+                    var diag = new { type = "error", message, line = token?.Line ?? 0, lexeme = token?.Lexeme ?? "" };
                     Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(diag));
                 }
                 else
@@ -70,7 +66,7 @@ namespace BadLang.Cli.Commands
                     string finalOutputPath = outputPath ?? Path.Combine(Path.GetDirectoryName(path) ?? "", moduleName);
 
                     compiler.WriteAssemblyToFile(llPath);
-                    PatchIR(llPath);
+                    PatchIr(llPath);
 
                     string runtimePath = ResolveRuntimePath();
                     string clangArgs = $"{llPath} {runtimePath} -o {finalOutputPath} -lm -O{optLevel}";
@@ -107,7 +103,7 @@ namespace BadLang.Cli.Commands
             }
         }
 
-        private void PatchIR(string path)
+        private void PatchIr(string path)
         {
             if (File.Exists(path))
             {

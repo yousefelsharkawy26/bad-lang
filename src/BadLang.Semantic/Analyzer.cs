@@ -1,5 +1,6 @@
 using System;
 using BadLang.Parser;
+using BadLang.Parser.Ast;
 
 namespace BadLang.Semantic
 {

@@ -10,13 +10,13 @@ namespace BadLang.IR.Optimization
     {
         public string Name => "Strength Reduction";
 
-        public IReadOnlyList<IRNode> Apply(IReadOnlyList<IRNode> nodes)
+        public IReadOnlyList<IrNode> Apply(IReadOnlyList<IrNode> nodes)
         {
-            var result = new List<IRNode>();
+            var result = new List<IrNode>();
 
             foreach (var node in nodes)
             {
-                if (node is IRBinary bin)
+                if (node is IrBinary bin)
                 {
                     result.Add(ReduceStrength(bin));
                 }
@@ -29,7 +29,7 @@ namespace BadLang.IR.Optimization
             return result;
         }
 
-        private IRNode ReduceStrength(IRBinary bin)
+        private IrNode ReduceStrength(IrBinary bin)
         {
             if (bin.Op == "*")
             {
@@ -49,9 +49,9 @@ namespace BadLang.IR.Optimization
             return bin;
         }
 
-        private bool IsConst2(IRValue value)
+        private bool IsConst2(IrValue value)
         {
-            if (value is IRConst c && c.Value is double d)
+            if (value is IrConst c && c.Value is double d)
             {
                 // Due to floating point representation, just check equality for small integers
                 return d == 2.0;

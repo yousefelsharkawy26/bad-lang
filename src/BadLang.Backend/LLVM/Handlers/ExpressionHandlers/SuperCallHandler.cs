@@ -1,17 +1,15 @@
-using System;
 using BadLang.Backend.LLVM.Core;
 using BadLang.Parser;
 using BadLang.Core;
+using BadLang.Parser.Ast;
 using LLVMSharp.Interop;
 
 namespace BadLang.Backend.LLVM.Handlers.ExpressionHandlers;
 
-public class SuperCallHandler : ExpressionHandler
+public class SuperCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler)
+    : ExpressionHandler(session, expressionCompiler)
 {
-    public SuperCallHandler(CompilationSession session, IExpressionCompiler expressionCompiler) 
-        : base(session, expressionCompiler) { }
-
-    public override bool CanHandle(Expr expr) => expr is Expr.Call call && call.Callee is Expr.Super;
+    public override bool CanHandle(Expr expr) => expr is Expr.Call { Callee: Expr.Super };
 
     public override LLVMValueRef Compile(Expr expr)
     {

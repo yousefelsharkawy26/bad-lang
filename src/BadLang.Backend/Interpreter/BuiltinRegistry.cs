@@ -11,7 +11,7 @@ public static class BuiltinRegistry
         {
             for (int i = 0; i < args.Count; i++)
             {
-                output.Write(args[i]?.ToString() + (i < args.Count - 1 ? " " : ""));
+                output.Write(args[i] + (i < args.Count - 1 ? " " : ""));
             }
             return null;
         }));
@@ -20,7 +20,7 @@ public static class BuiltinRegistry
         {
             for (int i = 0; i < args.Count; i++)
             {
-                output.Write(args[i]?.ToString() + (i < args.Count - 1 ? " " : ""));
+                output.Write(args[i] + (i < args.Count - 1 ? " " : ""));
             }
             output.WriteLine();
             return null;
@@ -106,9 +106,9 @@ public static class BuiltinRegistry
         }));
         globals.Define("list_pop", new NativeFunction(args =>
         {
-            if (args[0] is List<object?> list && list.Count > 0)
+            if (args[0] is List<object?> { Count: > 0 } list)
             {
-                var item = list[list.Count - 1];
+                var item = list[^1];
                 list.RemoveAt(list.Count - 1);
                 return item;
             }
@@ -189,10 +189,9 @@ public static class BuiltinRegistry
         }));
 
         // Time Primitives
-        globals.Define("time_now", new NativeFunction(args =>
-        {
-            return (double)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        }));
+        globals.Define("time_now", new NativeFunction(
+            _ => (double)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+        );
         globals.Define("time_sleep", new NativeFunction(args =>
         {
             var ms = Convert.ToInt32(args[0]);
@@ -201,31 +200,28 @@ public static class BuiltinRegistry
         }));
 
         // Map Primitives
-        globals.Define("map_new", new NativeFunction(args =>
-        {
-            return new Dictionary<object, object?>();
-        }));
+        globals.Define("map_new", new NativeFunction(_ => new Dictionary<object, object?>()));
         globals.Define("map_set", new NativeFunction(args =>
         {
-            if (args[0] is Dictionary<object, object?> map && args[1] is object key)
+            if (args[0] is Dictionary<object, object?> map && args[1] is { } key)
                 map[key] = args[2];
             return null;
         }));
         globals.Define("map_get", new NativeFunction(args =>
         {
-            if (args[0] is Dictionary<object, object?> map && args[1] is object key)
-                return map.TryGetValue(key, out var val) ? val : null;
+            if (args[0] is Dictionary<object, object?> map && args[1] is { } key)
+                return map.GetValueOrDefault(key);
             return null;
         }));
         globals.Define("map_has", new NativeFunction(args =>
         {
-            if (args[0] is Dictionary<object, object?> map && args[1] is object key)
+            if (args[0] is Dictionary<object, object?> map && args[1] is { } key)
                 return map.ContainsKey(key);
             return false;
         }));
         globals.Define("map_remove", new NativeFunction(args =>
         {
-            if (args[0] is Dictionary<object, object?> map && args[1] is object key)
+            if (args[0] is Dictionary<object, object?> map && args[1] is { } key)
                 map.Remove(key);
             return null;
         }));
@@ -249,11 +245,11 @@ public static class BuiltinRegistry
         }));
 
         // Type Utilities
-        globals.Define("typeof", new NativeFunction(args =>
-        {
-            return Evaluator.GetTypeString(args.Count > 0 ? args[0] : null);
-        }));
-        globals.Define("toInt", new NativeFunction(args =>
+        globals.Define("typeof", new NativeFunction(
+            args => Evaluator.GetTypeString(args.Count > 0 ? args[0] : null))
+        );
+        globals.Define("toInt", new NativeFunction(
+            args =>
         {
             if (args.Count == 0) return 0.0;
             return (double)(long)Convert.ToDouble(args[0]);
@@ -288,14 +284,14 @@ public static class BuiltinRegistry
             System.Environment.Exit(code);
             return null;
         }));
-        globals.Define("os_platform", new NativeFunction(args =>
+        globals.Define("os_platform", new NativeFunction(_ =>
         {
             if (OperatingSystem.IsWindows()) return "windows";
             if (OperatingSystem.IsMacOS()) return "macos";
             if (OperatingSystem.IsLinux()) return "linux";
             return "unknown";
         }));
-        globals.Define("os_args", new NativeFunction(args =>
+        globals.Define("os_args", new NativeFunction(_ =>
         {
             return System.Environment.GetCommandLineArgs().Select(x => (object?)x).ToList();
         }));
